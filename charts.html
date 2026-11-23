@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Macro Crypto">
+<meta name="theme-color" content="#0b0e14">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Macro Crypto</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --panel: #11151d;
+    --panel-2: #161b25;
+    --line: #222a37;
+    --text: #e6e9ef;
+    --muted: #8a93a6;
+    --accent: #f7a600;
+    --up: #22c55e;
+    --down: #ef4444;
+    --neutral: #eab308;
+    --gap: 8px;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    overscroll-behavior: none;
+  }
+  body {
+    display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px; border-bottom: 1px solid var(--line); flex: none;
+  }
+  .brand { font-weight: 700; letter-spacing: .2px; white-space: nowrap; }
+  .brand span { color: var(--accent); }
+  nav.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 7px 12px; border-radius: 8px; color: var(--muted); white-space: nowrap; font-weight: 600;
+  }
+  .tab[aria-selected="true"] { background: var(--panel-2); color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); }
+  .controls { display: flex; align-items: center; gap: 8px; flex: none; }
+  .seg { display: flex; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 2px; }
+  .seg button { padding: 5px 9px; border-radius: 6px; color: var(--muted); font-size: 13px; font-weight: 600; }
+  .seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--text); }
+  .icon-btn {
+    padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel);
+    color: var(--muted); font-size: 13px; font-weight: 600; white-space: nowrap;
+  }
+  .icon-btn[aria-pressed="true"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+  .clock { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 42px; text-align: right; }
+
+  /* ---------- Ticker ---------- */
+  .ticker { height: 46px; flex: none; border-bottom: 1px solid var(--line); overflow: hidden; }
+
+  /* ---------- Main ---------- */
+  main { flex: 1; min-height: 0; padding: var(--gap); overflow: auto; }
+  .grid {
+    display: grid; gap: var(--gap); height: 100%;
+    grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  }
+  .card-head {
+    display: flex; align-items: flex-start; gap: 8px; padding: 7px 10px 6px;
+    border-bottom: 1px solid var(--line); flex: none;
+  }
+  .card-title { font-weight: 700; font-size: 14px; }
+  .card-hint { color: var(--muted); font-size: 12px; line-height: 1.3; margin-top: 1px; }
+  .card-hint b { color: var(--text); font-weight: 600; }
+  .card-head .grow { flex: 1; min-width: 0; }
+  .expand { color: var(--muted); padding: 2px 6px; border-radius: 6px; font-size: 16px; line-height: 1; }
+  .card-body { flex: 1; min-height: 0; position: relative; }
+  .card-body > .tradingview-widget-container { position: absolute; inset: 0; }
+  .card.expanded {
+    position: fixed; z-index: 50;
+    inset: calc(env(safe-area-inset-top) + 6px) calc(env(safe-area-inset-right) + 6px) calc(env(safe-area-inset-bottom) + 6px) calc(env(safe-area-inset-left) + 6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  }
+  .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 40; display: none; }
+  .backdrop.show { display: block; }
+
+  /* ---------- Signals view ---------- */
+  .signals { display: grid; gap: var(--gap); grid-template-columns: repeat(4, 1fr); grid-auto-rows: min-content; }
+  .kpi { padding: 12px 14px; }
+  .kpi-label { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+  .kpi-value { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 4px; line-height: 1.1; }
+  .kpi-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .kpi-sub .up { color: var(--up); } .kpi-sub .down { color: var(--down); }
+  .gauge { width: 100%; height: 8px; border-radius: 4px; margin-top: 10px; position: relative;
+    background: linear-gradient(90deg, #ef4444 0%, #f97316 25%, #eab308 50%, #84cc16 75%, #22c55e 100%); }
+  .gauge i { position: absolute; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: var(--text);
+    box-shadow: 0 0 0 2px var(--bg); transform: translateX(-50%); transition: left .6s; }
+  .spark { display: block; width: 100%; height: 34px; margin-top: 8px; }
+  .ta { grid-column: span 4; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+  .ta .card { height: 360px; }
+  .rules { grid-column: span 4; padding: 12px 14px; }
+  .rules h3 { margin: 0 0 8px; font-size: 14px; }
+  .rules ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; }
+  .rules li { font-size: 13px; color: var(--muted); padding-left: 16px; position: relative; }
+  .rules li::before { content: ""; position: absolute; left: 0; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--dot, var(--muted)); }
+  .rules li b { color: var(--text); font-weight: 600; }
+  .rules .disclaimer { margin-top: 10px; font-size: 11px; color: var(--muted); opacity: .8; }
+  .err { color: var(--muted); font-size: 12px; }
+
+  /* ---------- Portrait / small ---------- */
+  @media (orientation: portrait), (max-width: 900px) {
+    header { flex-wrap: wrap; }
+    nav.tabs { order: 3; flex-basis: 100%; }
+    .grid { grid-template-columns: 1fr; grid-template-rows: none; height: auto; }
+    .grid .card { height: 46vh; }
+    .signals { grid-template-columns: 1fr 1fr; }
+    .ta, .rules { grid-column: span 2; }
+    .ta { grid-template-columns: 1fr; }
+    .rules ul { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Macro<span>·</span>Crypto</div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+  <div class="controls">
+    <div class="seg" id="intervals" aria-label="Unité de temps"></div>
+    <a class="icon-btn" href="./" style="text-decoration:none">Indicateurs</a>
+    <button class="icon-btn" id="rotate" aria-pressed="false" title="Fait défiler les onglets toutes les 60 s et garde l'écran allumé">Mode écran</button>
+    <div class="clock" id="clock"></div>
+  </div>
+</header>
+<div class="ticker" id="ticker"></div>
+<main id="main"></main>
+<div class="backdrop" id="backdrop"></div>
+
+<script>
+/* =====================================================================
+   CONFIGURATION — modifie librement les symboles / textes ci-dessous.
+   Tout symbole TradingView fonctionne (format EXCHANGE:TICKER).
+   ===================================================================== */
+const TABS = [
+  {
+    id: "dollar", label: "Dollar vs Crypto",
+    charts: [
+      { title: "Bitcoin vs DXY", symbol: "BITSTAMP:BTCUSD", compare: "TVC:DXY", interval: "W",
+        hint: "Corrélation <b>inverse</b> : un dollar qui baisse a historiquement porté les gros rallyes BTC." },
+      { title: "DXY · Dollar Index", symbol: "TVC:DXY", interval: "D", studies: ["STD;RSI"],
+        hint: "<b>DXY ↑</b> = liquidité mondiale qui se resserre → vent contraire pour la crypto." },
+      { title: "Taux US 10 ans", symbol: "TVC:US10Y", interval: "D",
+        hint: "Taux réels en hausse = actifs risqués sous pression. <b>Cassure à la baisse</b> = soulagement." },
+      { title: "USD/JPY · carry trade", symbol: "FX:USDJPY", interval: "D",
+        hint: "Chute <b>brutale</b> = débouclage du carry trade → liquidations en chaîne (ex. août 2024)." },
+    ],
+  },
+  {
+    id: "dominance", label: "Dominance & Rotation",
+    charts: [
+      { title: "USDT Dominance", symbol: "CRYPTOCAP:USDT.D", interval: "D", studies: ["STD;RSI"],
+        hint: "Miroir du marché : <b>USDT.D ↑</b> = sortie vers le cash (risk-off), <b>↓</b> = argent qui s'investit." },
+      { title: "Bitcoin Dominance", symbol: "CRYPTOCAP:BTC.D", interval: "W",
+        hint: "<b>BTC.D ↓</b> avec marché haussier = début de rotation vers les altcoins." },
+      { title: "ETH / BTC", symbol: "BINANCE:ETHBTC", interval: "W",
+        hint: "Baromètre de l'appétit pour le risque. <b>ETH/BTC ↑</b> précède souvent une altseason." },
+      { title: "OTHERS.D · petites caps", symbol: "CRYPTOCAP:OTHERS.D", interval: "W",
+        hint: "Part des cryptos hors top 10. Monte en <b>fin de cycle</b> / phase spéculative." },
+    ],
+  },
+  {
+    id: "liquidity", label: "Liquidité & Risque",
+    charts: [
+      { title: "Capitalisation crypto totale", symbol: "CRYPTOCAP:TOTAL", interval: "W",
+        hint: "Tendance de fond du marché. Au-dessus de ses moyennes hebdo = <b>cycle haussier</b>." },
+      { title: "Stablecoins · capitalisation USDT", symbol: "CRYPTOCAP:USDT", interval: "D",
+        hint: "Poudre sèche disponible. <b>Supply en hausse</b> = nouveaux capitaux qui entrent." },
+      { title: "Nasdaq 100 vs Bitcoin", symbol: "OANDA:NAS100USD", compare: "BITSTAMP:BTCUSD", interval: "D",
+        hint: "BTC trade souvent comme une <b>tech à fort bêta</b>. Divergence = signal à surveiller." },
+      { title: "Or (XAU/USD)", symbol: "OANDA:XAUUSD", interval: "D",
+        hint: "Valeur refuge et proxy de la dévaluation monétaire. L'or mène souvent BTC de <b>quelques mois</b>." },
+    ],
+  },
+  { id: "signals", label: "Signaux", signals: true },
+];
+
+const TICKER = [
+  { proName: "TVC:DXY", title: "DXY" },
+  { proName: "BITSTAMP:BTCUSD", title: "BTC" },
+  { proName: "BITSTAMP:ETHUSD", title: "ETH" },
+  { proName: "CRYPTOCAP:BTC.D", title: "BTC.D" },
+  { proName: "CRYPTOCAP:USDT.D", title: "USDT.D" },
+  { proName: "TVC:US10Y", title: "US10Y" },
+  { proName: "FX:USDJPY", title: "USD/JPY" },
+  { proName: "OANDA:NAS100USD", title: "Nasdaq" },
+  { proName: "OANDA:XAUUSD", title: "Or" },
+];
+
+const TA_SYMBOLS = [
+  { title: "DXY · signal technique", symbol: "TVC:DXY" },
+  { title: "Bitcoin · signal technique", symbol: "BITSTAMP:BTCUSD" },
+  { title: "USDT.D · signal technique", symbol: "CRYPTOCAP:USDT.D" },
+];
+
+const INTERVALS = [
+  { id: "auto", label: "Auto" }, { id: "240", label: "4H" },
+  { id: "D", label: "1J" }, { id: "W", label: "1S" },
+];
+
+const ROTATE_EVERY_MS = 60_000;
+const BG = "#11151d";
+
+/* ===================================================================== */
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("mc." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("mc." + k, JSON.stringify(v)); } catch {} },
+};
+
+let state = {
+  tab: store.get("tab", TABS[0].id),
+  interval: store.get("interval", "auto"),
+  rotate: false,
+};
+if (!TABS.some(t => t.id === state.tab)) state.tab = TABS[0].id;
+
+const $ = s => document.querySelector(s);
+const el = (tag, attrs = {}, html = "") => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (html) n.innerHTML = html;
+  return n;
+};
+
+/* ---------- TradingView embed helper ---------- */
+function tvWidget(container, script, config) {
+  container.innerHTML = "";
+  const wrap = el("div", { class: "tradingview-widget-container", style: "height:100%;width:100%" });
+  wrap.appendChild(el("div", { class: "tradingview-widget-container__widget", style: "height:100%;width:100%" }));
+  const s = document.createElement("script");
+  s.src = `https://s3.tradingview.com/external-embedding/embed-widget-${script}.js`;
+  s.async = true;
+  s.text = JSON.stringify(config);
+  wrap.appendChild(s);
+  container.appendChild(wrap);
+}
+
+function advancedChart(container, c) {
+  const interval = state.interval === "auto" ? (c.interval || "D") : state.interval;
+  const cfg = {
+    autosize: true,
+    symbol: c.symbol,
+    interval,
+    timezone: "Europe/Paris",
+    theme: "dark",
+    style: "1",
+    locale: "fr",
+    backgroundColor: BG,
+    gridColor: "rgba(255,255,255,0.04)",
+    hide_top_toolbar: true,
+    hide_side_toolbar: true,
+    hide_volume: true,
+    allow_symbol_change: false,
+    save_image: false,
+    calendar: false,
+    withdateranges: false,
+    studies: c.studies || [],
+    support_host: "https://www.tradingview.com",
+  };
+  if (c.compare) cfg.compareSymbols = [{ symbol: c.compare, position: "NewPriceScale" }];
+  tvWidget(container, "advanced-chart", cfg);
+}
+
+/* ---------- Header ---------- */
+function renderTabs() {
+  const nav = $("#tabs");
+  nav.innerHTML = "";
+  for (const t of TABS) {
+    const b = el("button", { class: "tab", role: "tab", "aria-selected": String(t.id === state.tab) }, t.label);
+    b.onclick = () => { setRotate(false); selectTab(t.id); };
+    nav.appendChild(b);
+  }
+}
+
+function renderIntervals() {
+  const box = $("#intervals");
+  box.innerHTML = "";
+  for (const i of INTERVALS) {
+    const b = el("button", { "aria-pressed": String(i.id === state.interval) }, i.label);
+    b.onclick = () => {
+      if (state.interval === i.id) return;
+      state.interval = i.id; store.set("interval", i.id);
+      renderIntervals(); renderMain();
+    };
+    box.appendChild(b);
+  }
+  box.style.visibility = currentTab().signals ? "hidden" : "visible";
+}
+
+const currentTab = () => TABS.find(t => t.id === state.tab);
+
+function selectTab(id) {
+  state.tab = id; store.set("tab", id);
+  collapse();
+  renderTabs(); renderIntervals(); renderMain();
+}
+
+/* ---------- Chart grid ---------- */
+function chartCard(c, renderBody) {
+  const card = el("section", { class: "card" });
+  const head = el("div", { class: "card-head" });
+  const txt = el("div", { class: "grow" });
+  txt.appendChild(el("div", { class: "card-title" }, c.title));
+  if (c.hint) txt.appendChild(el("div", { class: "card-hint" }, c.hint));
+  const ex = el("button", { class: "expand", title: "Agrandir", "aria-label": "Agrandir" }, "⤢");
+  ex.onclick = () => card.classList.contains("expanded") ? collapse() : expand(card);
+  head.append(txt, ex);
+  const body = el("div", { class: "card-body" });
+  card.append(head, body);
+  renderBody(body);
+  return card;
+}
+
+function expand(card) {
+  collapse();
+  card.classList.add("expanded");
+  card.querySelector(".expand").textContent = "✕";
+  $("#backdrop").classList.add("show");
+}
+function collapse() {
+  document.querySelectorAll(".card.expanded").forEach(c => {
+    c.classList.remove("expanded");
+    c.querySelector(".expand").textContent = "⤢";
+  });
+  $("#backdrop").classList.remove("show");
+}
+$("#backdrop").onclick = collapse;
+
+function renderMain() {
+  const main = $("#main");
+  main.innerHTML = "";
+  main.scrollTop = 0;
+  const tab = currentTab();
+  if (tab.signals) return renderSignals(main);
+  const grid = el("div", { class: "grid" });
+  for (const c of tab.charts) grid.appendChild(chartCard(c, body => advancedChart(body, c)));
+  main.appendChild(grid);
+}
+
+/* ---------- Signals tab ---------- */
+let signalsData = { fng: null, global: null };
+
+function renderSignals(main) {
+  const wrap = el("div", { class: "signals" });
+
+  wrap.appendChild(el("section", { class: "card kpi", id: "kpi-fng" }));
+  wrap.appendChild(el("section", { class: "card kpi", id: "kpi-btcd" }));
+  wrap.appendChild(el("section", { class: "card kpi", id: "kpi-stable" }));
+  wrap.appendChild(el("section", { class: "card kpi", id: "kpi-total" }));
+
+  const ta = el("div", { class: "ta" });
+  for (const t of TA_SYMBOLS) {
+    ta.appendChild(chartCard({ title: t.title }, body => tvWidget(body, "technical-analysis", {
+      interval: "1D", width: "100%", height: "100%", isTransparent: true,
+      symbol: t.symbol, showIntervalTabs: true, displayMode: "single",
+      locale: "fr", colorTheme: "dark",
+    })));
+  }
+  wrap.appendChild(ta);
+
+  const rules = el("section", { class: "card rules" });
+  rules.innerHTML = `
+    <h3>Grille de lecture</h3>
+    <ul>
+      <li style="--dot:var(--up)"><b>DXY ↓ + USDT.D ↓</b> : contexte risk-on, le plus favorable à la crypto.</li>
+      <li style="--dot:var(--down)"><b>DXY ↑ + US10Y ↑</b> : conditions financières qui se resserrent, prudence.</li>
+      <li style="--dot:var(--neutral)"><b>BTC.D ↑ & ETH/BTC ↓</b> : saison Bitcoin, les alts sous-performent.</li>
+      <li style="--dot:var(--up)"><b>BTC.D ↓ & OTHERS.D ↑</b> : rotation vers les altcoins.</li>
+      <li style="--dot:var(--down)"><b>USD/JPY qui chute vite</b> : risque de débouclage du carry trade.</li>
+      <li style="--dot:var(--neutral)"><b>Fear & Greed &lt; 20 / &gt; 80</b> : zones extrêmes, souvent contrariantes.</li>
+      <li style="--dot:var(--up)"><b>Supply stablecoins en hausse</b> : liquidité fraîche qui arrive.</li>
+      <li style="--dot:var(--neutral)"><b>USDT.D sur support/résistance clé</b> : se lit à l'inverse de BTC.</li>
+    </ul>
+    <div class="disclaimer">Repères de lecture pour contextualiser le marché, pas des conseils en investissement. Données : TradingView, alternative.me, CoinGecko.</div>`;
+  wrap.appendChild(rules);
+
+  main.appendChild(wrap);
+  paintKpis();
+  loadSignalsData();
+}
+
+const fmtPct = (v, d = 1) => (v >= 0 ? "+" : "") + v.toFixed(d) + " %";
+const fmtUsd = v => v >= 1e12 ? (v / 1e12).toFixed(2) + " T$" : (v / 1e9).toFixed(0) + " Md$";
+const fngColor = v => v < 25 ? "var(--down)" : v < 45 ? "#f97316" : v < 56 ? "var(--neutral)" : v < 75 ? "#84cc16" : "var(--up)";
+const FNG_FR = { "Extreme Fear": "Peur extrême", "Fear": "Peur", "Neutral": "Neutre", "Greed": "Avidité", "Extreme Greed": "Avidité extrême" };
+
+function sparkline(values, color) {
+  if (!values || values.length < 2) return "";
+  const w = 200, h = 34, min = Math.min(...values), max = Math.max(...values), r = max - min || 1;
+  const pts = values.map((v, i) => `${(i / (values.length - 1) * w).toFixed(1)},${(h - 3 - (v - min) / r * (h - 6)).toFixed(1)}`).join(" ");
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+
+function paintKpis() {
+  const f = $("#kpi-fng"), b = $("#kpi-btcd"), s = $("#kpi-stable"), t = $("#kpi-total");
+  if (!f) return;
+  const { fng, global } = signalsData;
+
+  if (fng && fng.length) {
+    const now = +fng[0].value, week = fng[7] ? +fng[7].value : null;
+    const delta = week === null ? "" : ` · <span class="${now >= week ? "up" : "down"}">${now >= week ? "+" : ""}${now - week} sur 7 j</span>`;
+    f.innerHTML = `<div class="kpi-label">Fear & Greed</div>
+      <div class="kpi-value" style="color:${fngColor(now)}">${now}</div>
+      <div class="kpi-sub">${FNG_FR[fng[0].value_classification] || fng[0].value_classification}${delta}</div>
+      <div class="gauge"><i style="left:${now}%"></i></div>
+      ${sparkline(fng.slice(0, 30).map(d => +d.value).reverse(), fngColor(now))}`;
+  } else {
+    f.innerHTML = `<div class="kpi-label">Fear & Greed</div><div class="kpi-value">…</div><div class="err">${fng === false ? "Indisponible" : "Chargement"}</div>`;
+  }
+
+  if (global) {
+    const p = global.market_cap_percentage;
+    const stable = (p.usdt || 0) + (p.usdc || 0);
+    const chg = global.market_cap_change_percentage_24h_usd;
+    b.innerHTML = `<div class="kpi-label">Dominance BTC</div>
+      <div class="kpi-value">${p.btc.toFixed(1)} %</div>
+      <div class="kpi-sub">ETH ${p.eth.toFixed(1)} % · ${p.btc > 60 ? "saison Bitcoin" : p.btc < 50 ? "terrain favorable aux alts" : "zone intermédiaire"}</div>`;
+    s.innerHTML = `<div class="kpi-label">Dominance stablecoins</div>
+      <div class="kpi-value">${stable.toFixed(1)} %</div>
+      <div class="kpi-sub">USDT ${(p.usdt || 0).toFixed(1)} % · USDC ${(p.usdc || 0).toFixed(1)} %</div>
+      <div class="kpi-sub">${stable > 8 ? "Beaucoup de cash en attente" : "Capital déjà investi"}</div>`;
+    t.innerHTML = `<div class="kpi-label">Capitalisation totale</div>
+      <div class="kpi-value">${fmtUsd(global.total_market_cap.usd)}</div>
+      <div class="kpi-sub"><span class="${chg >= 0 ? "up" : "down"}">${fmtPct(chg)}</span> sur 24 h</div>`;
+  } else {
+    const msg = `<div class="kpi-value">…</div><div class="err">${global === false ? "Indisponible" : "Chargement"}</div>`;
+    b.innerHTML = `<div class="kpi-label">Dominance BTC</div>` + msg;
+    s.innerHTML = `<div class="kpi-label">Dominance stablecoins</div>` + msg;
+    t.innerHTML = `<div class="kpi-label">Capitalisation totale</div>` + msg;
+  }
+}
+
+let lastFetch = 0;
+async function loadSignalsData(force = false) {
+  if (!force && Date.now() - lastFetch < 5 * 60_000 && signalsData.global) return;
+  lastFetch = Date.now();
+  const get = url => fetch(url, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  await Promise.all([
+    get("https://api.alternative.me/fng/?limit=31").then(j => signalsData.fng = j.data).catch(() => signalsData.fng = signalsData.fng || false),
+    get("https://api.coingecko.com/api/v3/global").then(j => signalsData.global = j.data).catch(() => signalsData.global = signalsData.global || false),
+  ]);
+  paintKpis();
+}
+
+/* ---------- Ticker ---------- */
+function renderTicker() {
+  tvWidget($("#ticker"), "ticker-tape", {
+    symbols: TICKER, showSymbolLogo: true, isTransparent: true,
+    displayMode: "adaptive", colorTheme: "dark", locale: "fr",
+  });
+}
+
+/* ---------- Mode écran (rotation + écran allumé) ---------- */
+let rotateTimer = null, wakeLock = null;
+async function setRotate(on) {
+  state.rotate = on;
+  $("#rotate").setAttribute("aria-pressed", String(on));
+  clearInterval(rotateTimer);
+  if (on) {
+    rotateTimer = setInterval(() => {
+      const i = TABS.findIndex(t => t.id === state.tab);
+      selectTab(TABS[(i + 1) % TABS.length].id);
+    }, ROTATE_EVERY_MS);
+    try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {}
+  } else if (wakeLock) {
+    try { await wakeLock.release(); } catch {}
+    wakeLock = null;
+  }
+}
+$("#rotate").onclick = () => setRotate(!state.rotate);
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState === "visible" && state.rotate) {
+    try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {}
+  }
+});
+
+/* ---------- Clock + housekeeping ---------- */
+function tick() {
+  $("#clock").textContent = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+}
+setInterval(tick, 10_000); tick();
+setInterval(() => { if (currentTab().signals) loadSignalsData(true); }, 5 * 60_000);
+// Recharge complète toutes les 6 h pour éviter que Safari n'accumule de la mémoire en mode affichage permanent.
+setTimeout(() => location.reload(), 6 * 3600_000);
+document.addEventListener("keydown", e => { if (e.key === "Escape") collapse(); });
+
+renderTabs();
+renderIntervals();
+renderTicker();
+renderMain();
+</script>
+</body>
+</html>

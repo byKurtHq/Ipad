@@ -1,28 +1,34 @@
 # Macro · Crypto — iPad dashboard
 
-A full-screen page made for the iPad (landscape and portrait). It shows the main indicator charts for crypto and the dollar (DXY).
+Full-screen animated dashboard ("motion design") for crypto and the dollar (DXY), built for the iPad.
 
-## Tabs
+## `index.html` — Indicators (home page)
 
-| Tab | Charts |
-| --- | --- |
-| **Dollar vs Crypto** | BTC vs DXY (overlay), DXY + RSI, US 10-year yield, USD/JPY (carry trade) |
-| **Dominance & Rotation** | USDT.D + RSI, BTC.D, ETH/BTC, OTHERS.D |
-| **Liquidité & Risque** | TOTAL, USDT market cap (stablecoins), Nasdaq 100 vs BTC, Gold |
-| **Signaux** | Fear & Greed (30 days), BTC dominance, stablecoin dominance, 24h total market cap, technical gauges (DXY / BTC / USDT.D), reading guide |
+| Tile | What it shows | Source |
+| --- | --- | --- |
+| Bitcoin · live | Real-time price (flashes on every move), 24h range, 7-day curve | Binance (WebSocket) |
+| Dollar Index · DXY | DXY recomputed from ECB exchange rates, gap to its 50-day MA, 30-day BTC/DXY correlation | Frankfurter (ECB) |
+| Market regime | Composite risk-on / risk-off score: dollar, BTC trend, sentiment, liquidity | computed |
+| Fear & Greed | Gauge + yesterday / 7 days / 30 days | alternative.me |
+| BTC derivatives | Funding rate, open interest (7 days), long/short ratio | Binance Futures (OKX as fallback) |
+| Dominance & rotation | BTC / ETH / stablecoins / others shares, ETH/BTC over 90 days | CoinGecko, Binance |
+| Altseason index | % of the top 50 alts outperforming BTC over 30 days + leaders | CoinGecko |
+| Bitcoin cycle | Mayer Multiple, 200-week MA, Pi Cycle Top, RSI 14 | Binance |
+| Liquidity & calendar | Stablecoin supply (30 days), live FOMC countdown, halving | DefiLlama, mempool.space |
+| News | French crypto + macro feed, auto-scrolling, tagged Macro / ETF / Regulation… | Cointelegraph FR, Journal du Coin, Cryptoast, Investing FR (via rss2json) |
 
-- **Auto / 4H / 1J / 1S**: timeframe for every chart ("Auto" uses each chart's recommended timeframe).
-- **⤢**: opens a chart full screen.
-- **Mode écran**: cycles through the tabs every 60 s and keeps the screen on (iPadOS 16.4+).
+Price bar at the bottom: BTC, ETH, SOL, XRP, BNB, DOGE, Gold (PAXG), DXY, Fear & Greed.
 
-The charts are live TradingView widgets. The KPIs come from alternative.me (Fear & Greed) and CoinGecko and refresh every 5 minutes.
+- Tap or slide a finger across a curve to read a value.
+- Tap the news feed to scroll it by hand (auto-scroll resumes after 30 s).
+- **Écran allumé** (keep screen on): stops the iPad from going to sleep.
 
-## Putting it on the iPad
+## `charts.html` — Charts
 
-1. Host the page with **GitHub Pages**: *Settings → Pages → Deploy from a branch*, select the branch and the `/ (root)` folder.
-2. Open the URL in **Safari** on the iPad → Share → **Add to Home Screen**.
-3. Launch it from the icon: it opens full screen with no Safari bar.
+The TradingView version (live charts grouped into tabs), reachable from the **Graphiques** button.
 
 ## Customising
 
-Everything is set in the `TABS`, `TICKER` and `TA_SYMBOLS` arrays at the top of the `<script>` in `index.html`. Any TradingView symbol works (`EXCHANGE:TICKER` format), along with its title and reading note.
+At the top of the `<script>` in `index.html`: `TAPE` (price bar), `FEEDS` (news RSS feeds), `FOMC` (Fed dates — the 2027 dates need adding).
+
+The indicators are reading aids, not investment advice.

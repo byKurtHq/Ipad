@@ -7,504 +7,839 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Macro Crypto">
-<meta name="theme-color" content="#0b0e14">
+<meta name="theme-color" content="#07090d">
 <link rel="apple-touch-icon" href="icon.png">
 <title>Macro Crypto</title>
 <style>
   :root {
-    --bg: #0b0e14;
-    --panel: #11151d;
-    --panel-2: #161b25;
-    --line: #222a37;
-    --text: #e6e9ef;
-    --muted: #8a93a6;
-    --accent: #f7a600;
+    color-scheme: dark;
+    --bg: #07090d;
+    --panel: #0d1117;
+    --panel-2: #131922;
+    --line: #1c2330;
+    --text: #e8ebf1;
+    --muted: #8b93a5;
+    --faint: #5b6475;
     --up: #22c55e;
     --down: #ef4444;
-    --neutral: #eab308;
+    --warn: #f59e0b;
+    --btc: #f7931a;
+    --eth: #8b7cf6;
+    --stable: #2dd4bf;
+    --other: #64748b;
+    --macro: #60a5fa;
     --gap: 8px;
-    --radius: 10px;
+    --r: 14px;
+    --ease-back: cubic-bezier(.34, 1.56, .64, 1);
+    --ease-out: cubic-bezier(.2, .8, .2, 1);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    margin: 0; height: 100%; background: var(--bg); color: var(--text);
-    font: 14px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-    overscroll-behavior: none;
-  }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
   body {
-    display: flex; flex-direction: column;
+    font: 13px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    height: 100vh; height: 100dvh;
+    display: grid; grid-template-rows: auto 1fr auto;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    overflow: hidden; overscroll-behavior: none;
   }
-  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  button, a { font: inherit; color: inherit; }
+  button { background: none; border: 0; cursor: pointer; }
+  .num { font-variant-numeric: tabular-nums; }
+  .up { color: var(--up); } .down { color: var(--down); } .warn { color: var(--warn); } .muted { color: var(--muted); }
 
   /* ---------- Header ---------- */
-  header {
-    display: flex; align-items: center; gap: 12px;
-    padding: 8px 12px; border-bottom: 1px solid var(--line); flex: none;
-  }
-  .brand { font-weight: 700; letter-spacing: .2px; white-space: nowrap; }
-  .brand span { color: var(--accent); }
-  nav.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
-  nav.tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    padding: 7px 12px; border-radius: 8px; color: var(--muted); white-space: nowrap; font-weight: 600;
-  }
-  .tab[aria-selected="true"] { background: var(--panel-2); color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); }
-  .controls { display: flex; align-items: center; gap: 8px; flex: none; }
-  .seg { display: flex; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 2px; }
-  .seg button { padding: 5px 9px; border-radius: 6px; color: var(--muted); font-size: 13px; font-weight: 600; }
-  .seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--text); }
-  .icon-btn {
-    padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel);
-    color: var(--muted); font-size: 13px; font-weight: 600; white-space: nowrap;
-  }
-  .icon-btn[aria-pressed="true"] { color: var(--bg); background: var(--accent); border-color: var(--accent); }
-  .clock { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 42px; text-align: right; }
+  header { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  .brand { font-weight: 800; font-size: 15px; letter-spacing: .2px; }
+  .brand span { color: var(--btc); }
+  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .8px; color: var(--muted); }
+  .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+  .live.on i { background: var(--up); animation: pulse 2s infinite; }
+  .live.on { color: var(--up); }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,.6); } 70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
+  .regime-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-weight: 700; font-size: 12px; transition: border-color .6s, color .6s; }
+  .spacer { flex: 1; }
+  .hbtn { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .hbtn[aria-pressed="true"] { background: var(--btc); border-color: var(--btc); color: #111; }
+  .clock { color: var(--muted); font-size: 12px; white-space: nowrap; }
 
-  /* ---------- Ticker ---------- */
-  .ticker { height: 46px; flex: none; border-bottom: 1px solid var(--line); overflow: hidden; }
+  /* ---------- Board ---------- */
+  .board { display: grid; grid-template-columns: 1fr minmax(260px, 27%); gap: var(--gap); padding: var(--gap); min-height: 0; }
+  .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: var(--gap); min-height: 0; }
+  .tile {
+    position: relative; min-height: 0; overflow: hidden;
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line); border-radius: var(--r);
+    animation: rise .7s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 70ms);
+  }
+  .tile::after { /* subtle sweep of light when a tile receives new data */
+    content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.05) 50%, transparent 70%);
+    transform: translateX(-120%);
+  }
+  .tile.refresh::after { animation: sweep 1.1s ease-out; }
+  @keyframes sweep { to { transform: translateX(120%); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.98); } }
+  .t-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); }
+  .t-head .upd { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--faint); white-space: nowrap; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+  .row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .big { white-space: nowrap; font-size: clamp(20px, min(3.9vh, 2.7vw), 38px); font-weight: 760; letter-spacing: -.5px; line-height: 1.05; font-variant-numeric: tabular-nums; transition: color .5s; }
+  .mid { white-space: nowrap; font-size: clamp(16px, min(2.6vh, 1.9vw), 24px); font-weight: 720; letter-spacing: -.3px; font-variant-numeric: tabular-nums; }
+  .sub { color: var(--muted); font-size: 12px; }
+  .sub b { color: var(--text); font-weight: 600; }
+  .chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; background: rgba(255,255,255,.06); color: var(--muted); white-space: nowrap; transition: background .4s, color .4s; }
+  .chip.up { background: rgba(34,197,94,.14); color: var(--up); }
+  .chip.down { background: rgba(239,68,68,.14); color: var(--down); }
+  .chip.warn { background: rgba(245,158,11,.14); color: var(--warn); }
+  .flash-up { animation: flashUp .7s; } .flash-down { animation: flashDown .7s; }
+  @keyframes flashUp { 30% { color: var(--up); text-shadow: 0 0 18px rgba(34,197,94,.6); } }
+  @keyframes flashDown { 30% { color: var(--down); text-shadow: 0 0 18px rgba(239,68,68,.6); } }
+  .kv { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; padding: 3px 0; border-top: 1px solid rgba(255,255,255,.05); color: var(--muted); }
+  .kv b { color: var(--text); font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .err { color: var(--faint); font-size: 12px; margin: auto; text-align: center; }
 
-  /* ---------- Main ---------- */
-  main { flex: 1; min-height: 0; padding: var(--gap); overflow: auto; }
-  .grid {
-    display: grid; gap: var(--gap); height: 100%;
-    grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
-  }
-  .card {
-    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-    display: flex; flex-direction: column; min-height: 0; overflow: hidden;
-  }
-  .card-head {
-    display: flex; align-items: flex-start; gap: 8px; padding: 7px 10px 6px;
-    border-bottom: 1px solid var(--line); flex: none;
-  }
-  .card-title { font-weight: 700; font-size: 14px; }
-  .card-hint { color: var(--muted); font-size: 12px; line-height: 1.3; margin-top: 1px; }
-  .card-hint b { color: var(--text); font-weight: 600; }
-  .card-head .grow { flex: 1; min-width: 0; }
-  .expand { color: var(--muted); padding: 2px 6px; border-radius: 6px; font-size: 16px; line-height: 1; }
-  .card-body { flex: 1; min-height: 0; position: relative; }
-  .card-body > .tradingview-widget-container { position: absolute; inset: 0; }
-  .card.expanded {
-    position: fixed; z-index: 50;
-    inset: calc(env(safe-area-inset-top) + 6px) calc(env(safe-area-inset-right) + 6px) calc(env(safe-area-inset-bottom) + 6px) calc(env(safe-area-inset-left) + 6px);
-    box-shadow: 0 20px 60px rgba(0,0,0,.6);
-  }
-  .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 40; display: none; }
-  .backdrop.show { display: block; }
+  /* Sparkline */
+  .spark { position: relative; flex: 1; min-height: 34px; touch-action: none; }
+  .spark svg { position: absolute; inset: 0; overflow: visible; }
+  .spark .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.6s var(--ease-out) forwards; }
+  .spark .area { opacity: 0; animation: fade 1.2s .5s forwards; }
+  .spark .last { animation: fade .3s 1.5s both; }
+  .spark .halo { transform-box: fill-box; transform-origin: center; animation: ring 2.4s 1.6s infinite; opacity: 0; }
+  .spark .cross, .spark .hdot { opacity: 0; transition: opacity .15s; }
+  .spark.hover .cross, .spark.hover .hdot { opacity: 1; }
+  .spark .tip { position: absolute; top: -2px; right: 0; padding: 1px 6px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); font-size: 11px; color: var(--text); font-variant-numeric: tabular-nums; opacity: 0; transition: opacity .15s; pointer-events: none; }
+  .spark.hover .tip { opacity: 1; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes fade { to { opacity: 1; } }
+  @keyframes ring { 0% { opacity: .7; transform: scale(1); } 100% { opacity: 0; transform: scale(3.2); } }
 
-  /* ---------- Signals view ---------- */
-  .signals { display: grid; gap: var(--gap); grid-template-columns: repeat(4, 1fr); grid-auto-rows: min-content; }
-  .kpi { padding: 12px 14px; }
-  .kpi-label { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
-  .kpi-value { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 4px; line-height: 1.1; }
-  .kpi-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .kpi-sub .up { color: var(--up); } .kpi-sub .down { color: var(--down); }
-  .gauge { width: 100%; height: 8px; border-radius: 4px; margin-top: 10px; position: relative;
-    background: linear-gradient(90deg, #ef4444 0%, #f97316 25%, #eab308 50%, #84cc16 75%, #22c55e 100%); }
-  .gauge i { position: absolute; top: -4px; width: 4px; height: 16px; border-radius: 2px; background: var(--text);
-    box-shadow: 0 0 0 2px var(--bg); transform: translateX(-50%); transition: left .6s; }
-  .spark { display: block; width: 100%; height: 34px; margin-top: 8px; }
-  .ta { grid-column: span 4; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
-  .ta .card { height: 360px; }
-  .rules { grid-column: span 4; padding: 12px 14px; }
-  .rules h3 { margin: 0 0 8px; font-size: 14px; }
-  .rules ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; }
-  .rules li { font-size: 13px; color: var(--muted); padding-left: 16px; position: relative; }
-  .rules li::before { content: ""; position: absolute; left: 0; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--dot, var(--muted)); }
-  .rules li b { color: var(--text); font-weight: 600; }
-  .rules .disclaimer { margin-top: 10px; font-size: 11px; color: var(--muted); opacity: .8; }
-  .err { color: var(--muted); font-size: 12px; }
+  /* Gauges */
+  .gauge { width: 100%; max-height: 112px; flex: 1; min-height: 70px; display: block; }
+  .gauge .needle { transform-origin: 100px 100px; transition: transform 1.6s var(--ease-back); }
+  .gauge .g-halo { transform-box: fill-box; transform-origin: center; animation: ringSm 2.4s 1.8s infinite; }
+  @keyframes ringSm { 0% { opacity: .35; transform: scale(.8); } 100% { opacity: 0; transform: scale(1.8); } }
+  .gauge .g-val { font-size: 34px; font-weight: 780; fill: var(--text); font-variant-numeric: tabular-nums; }
+  .gauge .g-lbl { font-size: 11px; font-weight: 700; fill: var(--muted); letter-spacing: .4px; }
 
-  /* ---------- Portrait / small ---------- */
-  @media (orientation: portrait), (max-width: 900px) {
+  /* Bars & meters */
+  .bar, .dbar, .meter, .meter-labels, .stack, .split, .split-l, .kv, .row, .t-head { flex: none; }
+  .bar { position: relative; height: 6px; border-radius: 3px; background: rgba(255,255,255,.07); overflow: hidden; }
+  .bar > i { position: absolute; top: 0; bottom: 0; left: 0; width: 0; border-radius: 3px; background: var(--c, var(--muted)); transition: left 1.2s var(--ease-out), width 1.2s var(--ease-out), background .6s; }
+  .dbar { position: relative; width: 64px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.07); flex: none; }
+  .dbar::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--faint); }
+  .dbar > i { position: absolute; top: 0; bottom: 0; left: 50%; width: 0; border-radius: 3px; transition: left 1.2s var(--ease-out), width 1.2s var(--ease-out); }
+  .meter { position: relative; height: 8px; border-radius: 4px; margin: 6px 0 2px; }
+  .meter .mk { position: absolute; top: -5px; width: 4px; height: 18px; border-radius: 2px; background: var(--text); box-shadow: 0 0 0 2px var(--bg); transform: translateX(-50%); left: 0; transition: left 1.6s var(--ease-back); }
+  .meter-labels { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--faint); }
+  .stack { display: flex; height: 12px; gap: 2px; border-radius: 4px; overflow: hidden; margin: 4px 0 2px; }
+  .stack > i { height: 100%; width: 0; transition: width 1.4s var(--ease-out); }
+  .stack > i:first-child { border-radius: 4px 0 0 4px; } .stack > i:last-child { border-radius: 0 4px 4px 0; }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; font-size: 12px; color: var(--muted); }
+  .legend b { color: var(--text); font-variant-numeric: tabular-nums; font-weight: 650; float: right; }
+  .split { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; }
+  .split i { transition: width 1.4s var(--ease-out); width: 50%; }
+  .split-l { display: flex; justify-content: space-between; font-size: 11.5px; margin-top: 3px; font-weight: 650; }
+  .factors { display: grid; gap: 4px; }
+  .factor { display: grid; grid-template-columns: minmax(0, 1fr) auto 44px; white-space: nowrap; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
+  .factor > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+  .factor .dbar { width: 100%; }
+  .factor b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; font-size: 11.5px; }
+  .tops { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tops .chip { animation: pop .5s var(--ease-back) both; }
+  @keyframes pop { from { opacity: 0; transform: scale(.6); } }
+  .countdown { font-size: clamp(15px, 2.3vh, 20px); font-weight: 720; font-variant-numeric: tabular-nums; letter-spacing: -.2px; }
+  .countdown span { color: var(--faint); font-size: .7em; font-weight: 600; margin: 0 4px 0 1px; }
+
+  /* ---------- News ---------- */
+  .news { display: flex; flex-direction: column; min-height: 0; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; animation: rise .7s var(--ease-out) .5s both; }
+  .news-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 8px; border-bottom: 1px solid var(--line); font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); }
+  .news-head .upd { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--faint); }
+  .news-list { position: relative; flex: 1; min-height: 0; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, #000 85%, transparent); mask-image: linear-gradient(180deg, #000 85%, transparent); }
+  .news-list.manual { overflow-y: auto; }
+  .news-track { will-change: transform; }
+  .n-item { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.05); text-decoration: none; color: inherit; animation: slideIn .6s var(--ease-out) both; }
+  .n-item:active { background: rgba(255,255,255,.04); }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(24px); } }
+  .n-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--faint); margin-bottom: 4px; flex-wrap: wrap; }
+  .n-tag { padding: 1px 7px; border-radius: 999px; font-weight: 700; font-size: 10.5px; color: var(--bg); background: var(--c); }
+  .n-new { color: var(--btc); font-weight: 800; letter-spacing: .4px; animation: blink 1.6s infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .n-title { font-size: 13.5px; font-weight: 600; line-height: 1.32; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .n-thumb { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: var(--panel-2); }
+
+  /* ---------- Tape ---------- */
+  .tape { overflow: hidden; border-top: 1px solid var(--line); height: 34px; white-space: nowrap; display: flex; align-items: center; }
+  .tape-track { display: inline-flex; animation: marquee 70s linear infinite; }
+  .tape-item { display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; font-size: 12.5px; font-variant-numeric: tabular-nums; border-right: 1px solid var(--line); }
+  .tape-item .s { color: var(--muted); font-weight: 700; }
+  .tape-item .p { font-weight: 650; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  /* ---------- Portrait / small screens ---------- */
+  @media (max-aspect-ratio: 1/1), (max-width: 900px) {
+    body { height: auto; min-height: 100dvh; overflow: auto; }
     header { flex-wrap: wrap; }
-    nav.tabs { order: 3; flex-basis: 100%; }
-    .grid { grid-template-columns: 1fr; grid-template-rows: none; height: auto; }
-    .grid .card { height: 46vh; }
-    .signals { grid-template-columns: 1fr 1fr; }
-    .ta, .rules { grid-column: span 2; }
-    .ta { grid-template-columns: 1fr; }
-    .rules ul { grid-template-columns: 1fr; }
+    .board { grid-template-columns: 1fr; }
+    .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 250px; }
+    .news { height: 70vh; }
+    .tape { position: sticky; bottom: 0; background: var(--bg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    .tape-track { animation: none; }
   }
 </style>
 </head>
 <body>
 <header>
   <div class="brand">Macro<span>·</span>Crypto</div>
-  <nav class="tabs" id="tabs" role="tablist"></nav>
-  <div class="controls">
-    <div class="seg" id="intervals" aria-label="Unité de temps"></div>
-    <button class="icon-btn" id="rotate" aria-pressed="false" title="Fait défiler les onglets toutes les 60 s et garde l'écran allumé">Mode écran</button>
-    <div class="clock" id="clock"></div>
-  </div>
+  <div class="live" id="live"><i></i><span>CONNEXION…</span></div>
+  <div class="regime-chip" id="regime-chip">Régime —</div>
+  <div class="spacer"></div>
+  <a class="hbtn" href="charts.html">Graphiques</a>
+  <button class="hbtn" id="wake" aria-pressed="false" title="Empêche l'iPad de se mettre en veille">Écran allumé</button>
+  <div class="clock num" id="clock"></div>
 </header>
-<div class="ticker" id="ticker"></div>
-<main id="main"></main>
-<div class="backdrop" id="backdrop"></div>
+
+<main class="board">
+  <div class="tiles">
+    <!-- 1. Bitcoin -->
+    <section class="tile" style="--i:0" id="t-btc">
+      <div class="t-head"><span><i class="dot" style="background:var(--btc)"></i>Bitcoin · live</span><span class="upd" id="btc-upd"></span></div>
+      <div class="row"><div class="big" id="btc-price">—</div><span class="chip" id="btc-chg">—</span></div>
+      <div class="sub" id="btc-range">&nbsp;</div>
+      <div class="spark" id="btc-spark"></div>
+      <div class="sub">7 jours · bougies horaires</div>
+    </section>
+
+    <!-- 2. DXY -->
+    <section class="tile" style="--i:1" id="t-dxy">
+      <div class="t-head"><span><i class="dot" style="background:var(--macro)"></i>Dollar Index · DXY</span><span class="upd" id="dxy-upd"></span></div>
+      <div class="row"><div class="big" id="dxy-val">—</div><span class="chip" id="dxy-chg">—</span></div>
+      <div class="sub" id="dxy-ma">&nbsp;</div>
+      <div class="spark" id="dxy-spark"></div>
+      <div class="kv"><span>Corrél. BTC/DXY 30 j</span><span style="display:flex;gap:8px;align-items:center"><b id="corr-val">—</b><span class="dbar" id="corr-bar"><i></i></span></span></div>
+    </section>
+
+    <!-- 3. Régime -->
+    <section class="tile" style="--i:2" id="t-regime">
+      <div class="t-head"><span>Régime de marché</span><span class="upd">score composite</span></div>
+      <svg class="gauge" id="regime-gauge" viewBox="0 0 200 112"></svg>
+      <div class="factors" id="regime-factors"></div>
+    </section>
+
+    <!-- 4. Fear & Greed -->
+    <section class="tile" style="--i:3" id="t-fng">
+      <div class="t-head"><span>Fear &amp; Greed</span><span class="upd" id="fng-upd"></span></div>
+      <svg class="gauge" id="fng-gauge" viewBox="0 0 200 112"></svg>
+      <div class="kv"><span>Hier</span><b id="fng-1">—</b></div>
+      <div class="kv"><span>Il y a 7 j</span><b id="fng-7">—</b></div>
+      <div class="kv"><span>Il y a 30 j</span><b id="fng-30">—</b></div>
+    </section>
+
+    <!-- 5. Dérivés -->
+    <section class="tile" style="--i:4" id="t-deriv">
+      <div class="t-head"><span>Dérivés BTC · perp</span><span class="upd" id="deriv-upd"></span></div>
+      <div class="row"><span class="sub">Funding (8 h)</span><span class="chip" id="fund-lbl">—</span></div>
+      <div class="row"><div class="mid" id="fund-val">—</div><span class="sub" id="fund-apr"></span></div>
+      <div class="kv"><span>Open interest</span><span style="display:flex;gap:6px;align-items:center"><b id="oi-val">—</b><span class="chip" id="oi-chg">—</span></span></div>
+      <div class="sub" style="margin-top:2px">Comptes long / short</div>
+      <div class="split" id="ls-split"><i style="background:var(--up)"></i><i style="background:var(--down)"></i></div>
+      <div class="split-l"><span class="up" id="ls-long">Long —</span><span class="down" id="ls-short">Short —</span></div>
+    </section>
+
+    <!-- 6. Dominance -->
+    <section class="tile" style="--i:5" id="t-dom">
+      <div class="t-head"><span>Dominance &amp; rotation</span><span class="upd" id="dom-upd"></span></div>
+      <div class="stack" id="dom-stack"><i style="background:var(--btc)"></i><i style="background:var(--eth)"></i><i style="background:var(--stable)"></i><i style="background:var(--other)"></i></div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--btc)"></i>BTC <b id="dom-btc">—</b></span>
+        <span><i class="dot" style="background:var(--eth)"></i>ETH <b id="dom-eth">—</b></span>
+        <span><i class="dot" style="background:var(--stable)"></i>Stables <b id="dom-stable">—</b></span>
+        <span><i class="dot" style="background:var(--other)"></i>Autres <b id="dom-other">—</b></span>
+      </div>
+      <div class="row" style="margin-top:4px"><span class="sub">ETH / BTC</span><span style="display:flex;gap:6px;align-items:center"><b class="num" id="ethbtc-val">—</b><span class="chip" id="ethbtc-chg">—</span></span></div>
+      <div class="spark" id="ethbtc-spark"></div>
+    </section>
+
+    <!-- 7. Altseason -->
+    <section class="tile" style="--i:6" id="t-alt">
+      <div class="t-head"><span>Altseason index</span><span class="upd" id="alt-upd"></span></div>
+      <div class="row"><div class="big"><span id="alt-val">—</span><span class="muted" style="font-size:.5em"> /100</span></div><span class="chip" id="alt-lbl">—</span></div>
+      <div class="meter" style="background:linear-gradient(90deg,var(--btc),#a3a3a3 50%,var(--eth))"><span class="mk" id="alt-mk"></span></div>
+      <div class="meter-labels"><span>Saison Bitcoin</span><span>Altseason</span></div>
+      <div class="sub" style="margin-top:4px">% du top 50 alts qui bat BTC (30 j) · leaders :</div>
+      <div class="tops" id="alt-tops"></div>
+    </section>
+
+    <!-- 8. Cycle -->
+    <section class="tile" style="--i:7" id="t-cycle">
+      <div class="t-head"><span>Cycle Bitcoin</span><span class="upd" id="cycle-upd"></span></div>
+      <div class="row"><span class="sub">Mayer Multiple</span><span class="chip" id="mayer-lbl">—</span></div>
+      <div class="mid" id="mayer-val">—</div>
+      <div class="meter" style="background:linear-gradient(90deg,var(--up) 0%,var(--up) 15%,#84cc16 25%,var(--warn) 62%,var(--down) 95%)"><span class="mk" id="mayer-mk"></span></div>
+      <div class="meter-labels"><span>0,5 sous-évalué</span><span>2,5 surchauffe</span></div>
+      <div class="kv"><span>Vs MM 200 semaines</span><b id="wma-val">—</b></div>
+      <div class="kv"><span>Pi Cycle Top (100 % = signal)</span><b id="pi-val">—</b></div>
+      <div class="kv"><span>RSI 14 j</span><b id="rsi-val">—</b></div>
+    </section>
+
+    <!-- 9. Liquidité & agenda -->
+    <section class="tile" style="--i:8" id="t-liq">
+      <div class="t-head"><span>Liquidité &amp; agenda</span><span class="upd" id="liq-upd"></span></div>
+      <div class="row"><span class="sub">Stablecoins en circulation</span><span class="chip" id="stab-chg">—</span></div>
+      <div class="mid" id="stab-val">—</div>
+      <div class="kv" style="margin-top:2px"><span>Prochain FOMC · <b id="fomc-date">—</b></span></div>
+      <div class="countdown" id="fomc-cd">—</div>
+      <div class="kv"><span>Halving BTC <span id="halv-date"></span></span><b id="halv-val">—</b></div>
+      <div class="bar"><i id="halv-bar" style="--c:var(--btc)"></i></div>
+    </section>
+  </div>
+
+  <aside class="news">
+    <div class="news-head"><span>Actualités crypto &amp; macro</span><span class="upd" id="news-upd"></span></div>
+    <div class="news-list" id="news-list"><div class="news-track" id="news-track"><div class="err" style="padding:20px">Chargement des actualités…</div></div></div>
+  </aside>
+</main>
+
+<footer class="tape"><div class="tape-track" id="tape"></div></footer>
 
 <script>
+"use strict";
 /* =====================================================================
-   CONFIGURATION — modifie librement les symboles / textes ci-dessous.
-   Tout symbole TradingView fonctionne (format EXCHANGE:TICKER).
+   CONFIGURATION
    ===================================================================== */
-const TABS = [
-  {
-    id: "dollar", label: "Dollar vs Crypto",
-    charts: [
-      { title: "Bitcoin vs DXY", symbol: "BITSTAMP:BTCUSD", compare: "TVC:DXY", interval: "W",
-        hint: "Corrélation <b>inverse</b> : un dollar qui baisse a historiquement porté les gros rallyes BTC." },
-      { title: "DXY · Dollar Index", symbol: "TVC:DXY", interval: "D", studies: ["STD;RSI"],
-        hint: "<b>DXY ↑</b> = liquidité mondiale qui se resserre → vent contraire pour la crypto." },
-      { title: "Taux US 10 ans", symbol: "TVC:US10Y", interval: "D",
-        hint: "Taux réels en hausse = actifs risqués sous pression. <b>Cassure à la baisse</b> = soulagement." },
-      { title: "USD/JPY · carry trade", symbol: "FX:USDJPY", interval: "D",
-        hint: "Chute <b>brutale</b> = débouclage du carry trade → liquidations en chaîne (ex. août 2024)." },
-    ],
-  },
-  {
-    id: "dominance", label: "Dominance & Rotation",
-    charts: [
-      { title: "USDT Dominance", symbol: "CRYPTOCAP:USDT.D", interval: "D", studies: ["STD;RSI"],
-        hint: "Miroir du marché : <b>USDT.D ↑</b> = sortie vers le cash (risk-off), <b>↓</b> = argent qui s'investit." },
-      { title: "Bitcoin Dominance", symbol: "CRYPTOCAP:BTC.D", interval: "W",
-        hint: "<b>BTC.D ↓</b> avec marché haussier = début de rotation vers les altcoins." },
-      { title: "ETH / BTC", symbol: "BINANCE:ETHBTC", interval: "W",
-        hint: "Baromètre de l'appétit pour le risque. <b>ETH/BTC ↑</b> précède souvent une altseason." },
-      { title: "OTHERS.D · petites caps", symbol: "CRYPTOCAP:OTHERS.D", interval: "W",
-        hint: "Part des cryptos hors top 10. Monte en <b>fin de cycle</b> / phase spéculative." },
-    ],
-  },
-  {
-    id: "liquidity", label: "Liquidité & Risque",
-    charts: [
-      { title: "Capitalisation crypto totale", symbol: "CRYPTOCAP:TOTAL", interval: "W",
-        hint: "Tendance de fond du marché. Au-dessus de ses moyennes hebdo = <b>cycle haussier</b>." },
-      { title: "Stablecoins · capitalisation USDT", symbol: "CRYPTOCAP:USDT", interval: "D",
-        hint: "Poudre sèche disponible. <b>Supply en hausse</b> = nouveaux capitaux qui entrent." },
-      { title: "Nasdaq 100 vs Bitcoin", symbol: "OANDA:NAS100USD", compare: "BITSTAMP:BTCUSD", interval: "D",
-        hint: "BTC trade souvent comme une <b>tech à fort bêta</b>. Divergence = signal à surveiller." },
-      { title: "Or (XAU/USD)", symbol: "OANDA:XAUUSD", interval: "D",
-        hint: "Valeur refuge et proxy de la dévaluation monétaire. L'or mène souvent BTC de <b>quelques mois</b>." },
-    ],
-  },
-  { id: "signals", label: "Signaux", signals: true },
+const TAPE = [
+  { sym: "BTCUSDT", label: "BTC" }, { sym: "ETHUSDT", label: "ETH" }, { sym: "SOLUSDT", label: "SOL" },
+  { sym: "XRPUSDT", label: "XRP" }, { sym: "BNBUSDT", label: "BNB" }, { sym: "DOGEUSDT", label: "DOGE" },
+  { sym: "PAXGUSDT", label: "OR (PAXG)" }, { sym: "DXY", label: "DXY" }, { sym: "FNG", label: "FEAR & GREED" },
 ];
 
-const TICKER = [
-  { proName: "TVC:DXY", title: "DXY" },
-  { proName: "BITSTAMP:BTCUSD", title: "BTC" },
-  { proName: "BITSTAMP:ETHUSD", title: "ETH" },
-  { proName: "CRYPTOCAP:BTC.D", title: "BTC.D" },
-  { proName: "CRYPTOCAP:USDT.D", title: "USDT.D" },
-  { proName: "TVC:US10Y", title: "US10Y" },
-  { proName: "FX:USDJPY", title: "USD/JPY" },
-  { proName: "OANDA:NAS100USD", title: "Nasdaq" },
-  { proName: "OANDA:XAUUSD", title: "Or" },
+// Flux RSS d'actualités (lus via rss2json, sans clé).
+const FEEDS = [
+  { name: "Cointelegraph", url: "https://fr.cointelegraph.com/rss" },
+  { name: "Journal du Coin", url: "https://journalducoin.com/feed/" },
+  { name: "Cryptoast", url: "https://cryptoast.fr/feed/" },
+  { name: "Investing", url: "https://fr.investing.com/rss/news_1.rss" },
 ];
 
-const TA_SYMBOLS = [
-  { title: "DXY · signal technique", symbol: "TVC:DXY" },
-  { title: "Bitcoin · signal technique", symbol: "BITSTAMP:BTCUSD" },
-  { title: "USDT.D · signal technique", symbol: "CRYPTOCAP:USDT.D" },
+// Annonces FOMC 2026 (2e jour de réunion, 14 h heure de New York) en UTC. À compléter pour 2027.
+const FOMC = [
+  "2026-01-28T19:00:00Z", "2026-03-18T18:00:00Z", "2026-04-29T18:00:00Z", "2026-06-17T18:00:00Z",
+  "2026-07-29T18:00:00Z", "2026-09-16T18:00:00Z", "2026-10-28T18:00:00Z", "2026-12-09T19:00:00Z",
 ];
 
-const INTERVALS = [
-  { id: "auto", label: "Auto" }, { id: "240", label: "4H" },
-  { id: "D", label: "1J" }, { id: "W", label: "1S" },
-];
+const BINANCE = ["https://data-api.binance.vision", "https://api.binance.com"];
+const BINANCE_WS = ["wss://data-stream.binance.vision/stream", "wss://stream.binance.com:9443/stream"];
+const FAPI = "https://fapi.binance.com";
 
-const ROTATE_EVERY_MS = 60_000;
-const BG = "#11151d";
+/* =====================================================================
+   Utilitaires
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const clamp = (v, a = -1, b = 1) => Math.max(a, Math.min(b, v));
+const NF = {};
+const nf = d => NF[d] || (NF[d] = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: d, maximumFractionDigits: d }));
+const fmt = (v, d = 0) => nf(d).format(v).replace("-", "−");
+const pct = (v, d = 1) => (v > 0 ? "+" : v < 0 ? "−" : "") + nf(d).format(Math.abs(v)) + " %";
+const usd = v => v >= 1000 ? fmt(v, 0) + " $" : v >= 1 ? fmt(v, 2) + " $" : fmt(v, 4) + " $";
+const money = v => v >= 1e12 ? fmt(v / 1e12, 2) + " T$" : v >= 1e9 ? fmt(v / 1e9, 1) + " Md$" : fmt(v / 1e6, 0) + " M$";
+const hhmm = (d = new Date()) => d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+const sign = v => v > 0 ? "up" : v < 0 ? "down" : "";
+const sma = (a, n) => a.length < n ? NaN : a.slice(-n).reduce((s, x) => s + x, 0) / n;
 
-/* ===================================================================== */
-
-const store = {
-  get(k, d) { try { const v = localStorage.getItem("mc." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
-  set(k, v) { try { localStorage.setItem("mc." + k, JSON.stringify(v)); } catch {} },
-};
-
-let state = {
-  tab: store.get("tab", TABS[0].id),
-  interval: store.get("interval", "auto"),
-  rotate: false,
-};
-if (!TABS.some(t => t.id === state.tab)) state.tab = TABS[0].id;
-
-const $ = s => document.querySelector(s);
-const el = (tag, attrs = {}, html = "") => {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
-  if (html) n.innerHTML = html;
-  return n;
-};
-
-/* ---------- TradingView embed helper ---------- */
-function tvWidget(container, script, config) {
-  container.innerHTML = "";
-  const wrap = el("div", { class: "tradingview-widget-container", style: "height:100%;width:100%" });
-  wrap.appendChild(el("div", { class: "tradingview-widget-container__widget", style: "height:100%;width:100%" }));
-  const s = document.createElement("script");
-  s.src = `https://s3.tradingview.com/external-embedding/embed-widget-${script}.js`;
-  s.async = true;
-  s.text = JSON.stringify(config);
-  wrap.appendChild(s);
-  container.appendChild(wrap);
+async function getJSON(urls, { timeout = 15000, text = false } = {}) {
+  let lastErr;
+  for (const url of [].concat(urls)) {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), timeout);
+    try {
+      const r = await fetch(url, { signal: ctl.signal, cache: "no-store" });
+      if (!r.ok) throw new Error(r.status + " " + url);
+      return text ? await r.text() : await r.json();
+    } catch (e) { lastErr = e; } finally { clearTimeout(t); }
+  }
+  throw lastErr;
 }
+const binance = path => getJSON(BINANCE.map(h => h + path));
+const klines = (s, i, l) => binance(`/api/v3/klines?symbol=${s}&interval=${i}&limit=${l}`);
 
-function advancedChart(container, c) {
-  const interval = state.interval === "auto" ? (c.interval || "D") : state.interval;
-  const cfg = {
-    autosize: true,
-    symbol: c.symbol,
-    interval,
-    timezone: "Europe/Paris",
-    theme: "dark",
-    style: "1",
-    locale: "fr",
-    backgroundColor: BG,
-    gridColor: "rgba(255,255,255,0.04)",
-    hide_top_toolbar: true,
-    hide_side_toolbar: true,
-    hide_volume: true,
-    allow_symbol_change: false,
-    save_image: false,
-    calendar: false,
-    withdateranges: false,
-    studies: c.studies || [],
-    support_host: "https://www.tradingview.com",
+/** Animated number: counts from the previous value to the new one. */
+function tween(el, to, format, dur = 1100) {
+  if (!el) return;
+  const from = typeof el._v === "number" ? el._v : 0;
+  el._v = to;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || from === to) { el.textContent = format(to); return; }
+  const t0 = performance.now();
+  cancelAnimationFrame(el._raf);
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = format(from + (to - from) * e);
+    if (k < 1) el._raf = requestAnimationFrame(step);
   };
-  if (c.compare) cfg.compareSymbols = [{ symbol: c.compare, position: "NewPriceScale" }];
-  tvWidget(container, "advanced-chart", cfg);
+  el._raf = requestAnimationFrame(step);
 }
+function setChip(el, text, cls) { el.textContent = text; el.className = "chip " + (cls || ""); }
+function refreshed(tileId, updId, label) {
+  const t = $(tileId);
+  t.classList.remove("refresh"); void t.offsetWidth; t.classList.add("refresh");
+  if (updId) $(updId).textContent = label || "maj " + hhmm();
+}
+function failed(updId) { if ($(updId)) $(updId).textContent = "indisponible · nouvel essai"; }
 
-/* ---------- Header ---------- */
-function renderTabs() {
-  const nav = $("#tabs");
-  nav.innerHTML = "";
-  for (const t of TABS) {
-    const b = el("button", { class: "tab", role: "tab", "aria-selected": String(t.id === state.tab) }, t.label);
-    b.onclick = () => { setRotate(false); selectTab(t.id); };
-    nav.appendChild(b);
+/* =====================================================================
+   Sparkline (SVG at real pixel size, draw-in animation, touch readout)
+   ===================================================================== */
+let sparkSeq = 0;
+function spark(el, pts, color, format, dateFmt) {
+  el._spark = { pts, color, format, dateFmt };
+  renderSpark(el);
+}
+function renderSpark(el) {
+  const s = el._spark; if (!s) return;
+  const w = el.clientWidth, h = el.clientHeight, n = s.pts.length;
+  if (!w || !h || n < 2) return;
+  const vals = s.pts.map(p => p.v), min = Math.min(...vals), max = Math.max(...vals), rng = max - min || 1;
+  const pad = 4;
+  const X = i => i / (n - 1) * (w - 6);
+  const Y = v => pad + (1 - (v - min) / rng) * (h - pad * 2);
+  const d = s.pts.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(p.v).toFixed(1)).join("");
+  const id = "g" + (++sparkSeq);
+  const lx = X(n - 1), ly = Y(vals[n - 1]);
+  el.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".3"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient></defs>
+    <path class="area" d="${d}L${lx} ${h}L0 ${h}Z" fill="url(#${id})"/>
+    <path class="line" d="${d}" stroke="${s.color}" pathLength="1"/>
+    <circle class="halo" cx="${lx}" cy="${ly}" r="3" fill="${s.color}"/>
+    <circle class="last" cx="${lx}" cy="${ly}" r="3" fill="${s.color}" stroke="var(--bg)" stroke-width="2"/>
+    <line class="cross" y1="0" y2="${h}" stroke="var(--faint)" stroke-dasharray="3 3"/>
+    <circle class="hdot" r="4" fill="var(--text)" stroke="var(--bg)" stroke-width="2"/>
+  </svg><div class="tip"></div>`;
+  const cross = el.querySelector(".cross"), dot = el.querySelector(".hdot"), tip = el.querySelector(".tip");
+  const show = e => {
+    const r = el.getBoundingClientRect();
+    const i = Math.round(clamp((e.clientX - r.left) / (w - 6), 0, 1) * (n - 1));
+    const p = s.pts[i];
+    cross.setAttribute("x1", X(i)); cross.setAttribute("x2", X(i));
+    dot.setAttribute("cx", X(i)); dot.setAttribute("cy", Y(p.v));
+    tip.textContent = s.format(p.v) + " · " + s.dateFmt(p.t);
+    el.classList.add("hover");
+  };
+  el.onpointerdown = el.onpointermove = show;
+  el.onpointerleave = el.onpointerup = el.onpointercancel = () => el.classList.remove("hover");
+}
+const ro = new ResizeObserver(entries => entries.forEach(e => renderSpark(e.target)));
+document.querySelectorAll(".spark").forEach(el => ro.observe(el));
+const dDay = t => new Date(t).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+const dHour = t => new Date(t).toLocaleString("fr-FR", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+
+/* =====================================================================
+   Gauges (semicircle 0-100, needle with overshoot)
+   ===================================================================== */
+function buildGauge(svg, segments, caption) {
+  const R = 80, P = v => [100 - R * Math.cos(Math.PI * v / 100), 100 - R * Math.sin(Math.PI * v / 100)];
+  let from = 0, arcs = "";
+  for (const s of segments) {
+    const [x0, y0] = P(from + (from ? .8 : 0)), [x1, y1] = P(s.to - (s.to < 100 ? .8 : 0));
+    arcs += `<path d="M${x0.toFixed(2)} ${y0.toFixed(2)}A${R} ${R} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}" stroke="${s.color}" stroke-width="13" fill="none" opacity=".9"/>`;
+    from = s.to;
   }
+  svg.innerHTML = `${arcs}
+    <g class="needle"><circle cx="20" cy="100" r="13" fill="var(--text)" opacity=".18" class="g-halo"/><circle cx="20" cy="100" r="8.5" fill="var(--text)" stroke="var(--bg)" stroke-width="3.5"/></g>
+    <text class="g-val" x="100" y="90" text-anchor="middle">—</text>
+    <text class="g-lbl" x="100" y="109" text-anchor="middle">${caption || ""}</text>`;
 }
-
-function renderIntervals() {
-  const box = $("#intervals");
-  box.innerHTML = "";
-  for (const i of INTERVALS) {
-    const b = el("button", { "aria-pressed": String(i.id === state.interval) }, i.label);
-    b.onclick = () => {
-      if (state.interval === i.id) return;
-      state.interval = i.id; store.set("interval", i.id);
-      renderIntervals(); renderMain();
-    };
-    box.appendChild(b);
-  }
-  box.style.visibility = currentTab().signals ? "hidden" : "visible";
+function setGauge(svg, v, label) {
+  svg.querySelector(".needle").style.transform = `rotate(${clamp(v, 0, 100) / 100 * 180}deg)`;
+  tween(svg.querySelector(".g-val"), v, x => fmt(x, 0));
+  if (label !== undefined) svg.querySelector(".g-lbl").textContent = label;
 }
+const FIVE = [
+  { to: 20, color: "#ef4444" }, { to: 40, color: "#f97316" }, { to: 60, color: "#eab308" },
+  { to: 80, color: "#84cc16" }, { to: 100, color: "#22c55e" },
+];
+buildGauge($("regime-gauge"), FIVE, "—");
+buildGauge($("fng-gauge"), FIVE, "—");
 
-const currentTab = () => TABS.find(t => t.id === state.tab);
+/* =====================================================================
+   State shared between indicators
+   ===================================================================== */
+const S = { btcDaily: null, dxy: null, factors: {}, prices: {} };
 
-function selectTab(id) {
-  state.tab = id; store.set("tab", id);
-  collapse();
-  renderTabs(); renderIntervals(); renderMain();
+/* ---------- Ticker tape ---------- */
+function buildTape() {
+  const html = TAPE.map(t => `<span class="tape-item" data-sym="${t.sym}"><span class="s">${t.label}</span><span class="p">—</span><span class="c"></span></span>`).join("");
+  $("tape").innerHTML = html + html; // doubled for a seamless loop
 }
-
-/* ---------- Chart grid ---------- */
-function chartCard(c, renderBody) {
-  const card = el("section", { class: "card" });
-  const head = el("div", { class: "card-head" });
-  const txt = el("div", { class: "grow" });
-  txt.appendChild(el("div", { class: "card-title" }, c.title));
-  if (c.hint) txt.appendChild(el("div", { class: "card-hint" }, c.hint));
-  const ex = el("button", { class: "expand", title: "Agrandir", "aria-label": "Agrandir" }, "⤢");
-  ex.onclick = () => card.classList.contains("expanded") ? collapse() : expand(card);
-  head.append(txt, ex);
-  const body = el("div", { class: "card-body" });
-  card.append(head, body);
-  renderBody(body);
-  return card;
-}
-
-function expand(card) {
-  collapse();
-  card.classList.add("expanded");
-  card.querySelector(".expand").textContent = "✕";
-  $("#backdrop").classList.add("show");
-}
-function collapse() {
-  document.querySelectorAll(".card.expanded").forEach(c => {
-    c.classList.remove("expanded");
-    c.querySelector(".expand").textContent = "⤢";
+function setTape(sym, price, chg) {
+  document.querySelectorAll(`.tape-item[data-sym="${sym}"]`).forEach(n => {
+    n.querySelector(".p").textContent = price;
+    const c = n.querySelector(".c");
+    c.textContent = chg === null || chg === undefined ? "" : pct(chg, 2);
+    c.className = "c " + sign(chg);
   });
-  $("#backdrop").classList.remove("show");
-}
-$("#backdrop").onclick = collapse;
-
-function renderMain() {
-  const main = $("#main");
-  main.innerHTML = "";
-  main.scrollTop = 0;
-  const tab = currentTab();
-  if (tab.signals) return renderSignals(main);
-  const grid = el("div", { class: "grid" });
-  for (const c of tab.charts) grid.appendChild(chartCard(c, body => advancedChart(body, c)));
-  main.appendChild(grid);
 }
 
-/* ---------- Signals tab ---------- */
-let signalsData = { fng: null, global: null };
-
-function renderSignals(main) {
-  const wrap = el("div", { class: "signals" });
-
-  wrap.appendChild(el("section", { class: "card kpi", id: "kpi-fng" }));
-  wrap.appendChild(el("section", { class: "card kpi", id: "kpi-btcd" }));
-  wrap.appendChild(el("section", { class: "card kpi", id: "kpi-stable" }));
-  wrap.appendChild(el("section", { class: "card kpi", id: "kpi-total" }));
-
-  const ta = el("div", { class: "ta" });
-  for (const t of TA_SYMBOLS) {
-    ta.appendChild(chartCard({ title: t.title }, body => tvWidget(body, "technical-analysis", {
-      interval: "1D", width: "100%", height: "100%", isTransparent: true,
-      symbol: t.symbol, showIntervalTabs: true, displayMode: "single",
-      locale: "fr", colorTheme: "dark",
-    })));
-  }
-  wrap.appendChild(ta);
-
-  const rules = el("section", { class: "card rules" });
-  rules.innerHTML = `
-    <h3>Grille de lecture</h3>
-    <ul>
-      <li style="--dot:var(--up)"><b>DXY ↓ + USDT.D ↓</b> : contexte risk-on, le plus favorable à la crypto.</li>
-      <li style="--dot:var(--down)"><b>DXY ↑ + US10Y ↑</b> : conditions financières qui se resserrent, prudence.</li>
-      <li style="--dot:var(--neutral)"><b>BTC.D ↑ & ETH/BTC ↓</b> : saison Bitcoin, les alts sous-performent.</li>
-      <li style="--dot:var(--up)"><b>BTC.D ↓ & OTHERS.D ↑</b> : rotation vers les altcoins.</li>
-      <li style="--dot:var(--down)"><b>USD/JPY qui chute vite</b> : risque de débouclage du carry trade.</li>
-      <li style="--dot:var(--neutral)"><b>Fear & Greed &lt; 20 / &gt; 80</b> : zones extrêmes, souvent contrariantes.</li>
-      <li style="--dot:var(--up)"><b>Supply stablecoins en hausse</b> : liquidité fraîche qui arrive.</li>
-      <li style="--dot:var(--neutral)"><b>USDT.D sur support/résistance clé</b> : se lit à l'inverse de BTC.</li>
-    </ul>
-    <div class="disclaimer">Repères de lecture pour contextualiser le marché, pas des conseils en investissement. Données : TradingView, alternative.me, CoinGecko.</div>`;
-  wrap.appendChild(rules);
-
-  main.appendChild(wrap);
-  paintKpis();
-  loadSignalsData();
-}
-
-const fmtPct = (v, d = 1) => (v >= 0 ? "+" : "") + v.toFixed(d) + " %";
-const fmtUsd = v => v >= 1e12 ? (v / 1e12).toFixed(2) + " T$" : (v / 1e9).toFixed(0) + " Md$";
-const fngColor = v => v < 25 ? "var(--down)" : v < 45 ? "#f97316" : v < 56 ? "var(--neutral)" : v < 75 ? "#84cc16" : "var(--up)";
-const FNG_FR = { "Extreme Fear": "Peur extrême", "Fear": "Peur", "Neutral": "Neutre", "Greed": "Avidité", "Extreme Greed": "Avidité extrême" };
-
-function sparkline(values, color) {
-  if (!values || values.length < 2) return "";
-  const w = 200, h = 34, min = Math.min(...values), max = Math.max(...values), r = max - min || 1;
-  const pts = values.map((v, i) => `${(i / (values.length - 1) * w).toFixed(1)},${(h - 3 - (v - min) / r * (h - 6)).toFixed(1)}`).join(" ");
-  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
-}
-
-function paintKpis() {
-  const f = $("#kpi-fng"), b = $("#kpi-btcd"), s = $("#kpi-stable"), t = $("#kpi-total");
-  if (!f) return;
-  const { fng, global } = signalsData;
-
-  if (fng && fng.length) {
-    const now = +fng[0].value, week = fng[7] ? +fng[7].value : null;
-    const delta = week === null ? "" : ` · <span class="${now >= week ? "up" : "down"}">${now >= week ? "+" : ""}${now - week} sur 7 j</span>`;
-    f.innerHTML = `<div class="kpi-label">Fear & Greed</div>
-      <div class="kpi-value" style="color:${fngColor(now)}">${now}</div>
-      <div class="kpi-sub">${FNG_FR[fng[0].value_classification] || fng[0].value_classification}${delta}</div>
-      <div class="gauge"><i style="left:${now}%"></i></div>
-      ${sparkline(fng.slice(0, 30).map(d => +d.value).reverse(), fngColor(now))}`;
-  } else {
-    f.innerHTML = `<div class="kpi-label">Fear & Greed</div><div class="kpi-value">…</div><div class="err">${fng === false ? "Indisponible" : "Chargement"}</div>`;
-  }
-
-  if (global) {
-    const p = global.market_cap_percentage;
-    const stable = (p.usdt || 0) + (p.usdc || 0);
-    const chg = global.market_cap_change_percentage_24h_usd;
-    b.innerHTML = `<div class="kpi-label">Dominance BTC</div>
-      <div class="kpi-value">${p.btc.toFixed(1)} %</div>
-      <div class="kpi-sub">ETH ${p.eth.toFixed(1)} % · ${p.btc > 60 ? "saison Bitcoin" : p.btc < 50 ? "terrain favorable aux alts" : "zone intermédiaire"}</div>`;
-    s.innerHTML = `<div class="kpi-label">Dominance stablecoins</div>
-      <div class="kpi-value">${stable.toFixed(1)} %</div>
-      <div class="kpi-sub">USDT ${(p.usdt || 0).toFixed(1)} % · USDC ${(p.usdc || 0).toFixed(1)} %</div>
-      <div class="kpi-sub">${stable > 8 ? "Beaucoup de cash en attente" : "Capital déjà investi"}</div>`;
-    t.innerHTML = `<div class="kpi-label">Capitalisation totale</div>
-      <div class="kpi-value">${fmtUsd(global.total_market_cap.usd)}</div>
-      <div class="kpi-sub"><span class="${chg >= 0 ? "up" : "down"}">${fmtPct(chg)}</span> sur 24 h</div>`;
-  } else {
-    const msg = `<div class="kpi-value">…</div><div class="err">${global === false ? "Indisponible" : "Chargement"}</div>`;
-    b.innerHTML = `<div class="kpi-label">Dominance BTC</div>` + msg;
-    s.innerHTML = `<div class="kpi-label">Dominance stablecoins</div>` + msg;
-    t.innerHTML = `<div class="kpi-label">Capitalisation totale</div>` + msg;
+/* ---------- Live prices (WebSocket, REST fallback) ---------- */
+function onTicker(sym, last, open, high, low) {
+  const chg = (last / open - 1) * 100;
+  const prev = S.prices[sym];
+  S.prices[sym] = last;
+  setTape(sym, usd(last), chg);
+  if (sym === "BTCUSDT") {
+    const el = $("btc-price");
+    if (prev === undefined) tween(el, last, v => usd(v));
+    else {
+      el._v = last; el.textContent = usd(last);
+      if (last !== prev) { el.classList.remove("flash-up", "flash-down"); void el.offsetWidth; el.classList.add(last > prev ? "flash-up" : "flash-down"); }
+    }
+    setChip($("btc-chg"), pct(chg, 2) + " 24 h", sign(chg));
+    $("btc-range").innerHTML = `Bas <b>${usd(low)}</b> · Haut <b>${usd(high)}</b>`;
   }
 }
+async function pollTickers() {
+  const syms = TAPE.filter(t => t.sym.endsWith("USDT")).map(t => t.sym);
+  const data = await binance(`/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(syms))}`);
+  data.forEach(d => onTicker(d.symbol, +d.lastPrice, +d.openPrice, +d.highPrice, +d.lowPrice));
+}
+let ws, wsHost = 0, wsRetry = 0, pollTimer = null;
+function connectWS() {
+  const streams = TAPE.filter(t => t.sym.endsWith("USDT")).map(t => t.sym.toLowerCase() + "@miniTicker").join("/");
+  try { ws = new WebSocket(`${BINANCE_WS[wsHost % BINANCE_WS.length]}?streams=${streams}`); } catch { return scheduleWS(); }
+  ws.onopen = () => { wsRetry = 0; setLive(true); clearInterval(pollTimer); pollTimer = null; };
+  ws.onmessage = e => { const d = JSON.parse(e.data).data; if (d) onTicker(d.s, +d.c, +d.o, +d.h, +d.l); };
+  ws.onclose = ws.onerror = () => { if (ws._closed) return; ws._closed = true; setLive(false); scheduleWS(); };
+}
+function scheduleWS() {
+  wsHost++; wsRetry++;
+  if (!pollTimer) pollTimer = setInterval(() => pollTickers().catch(() => {}), 30_000);
+  setTimeout(connectWS, Math.min(60_000, 2000 * wsRetry));
+}
+function setLive(on) {
+  $("live").classList.toggle("on", on);
+  $("live").querySelector("span").textContent = on ? "LIVE" : "RECONNEXION…";
+}
 
-let lastFetch = 0;
-async function loadSignalsData(force = false) {
-  if (!force && Date.now() - lastFetch < 5 * 60_000 && signalsData.global) return;
-  lastFetch = Date.now();
-  const get = url => fetch(url, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-  await Promise.all([
-    get("https://api.alternative.me/fng/?limit=31").then(j => signalsData.fng = j.data).catch(() => signalsData.fng = signalsData.fng || false),
-    get("https://api.coingecko.com/api/v3/global").then(j => signalsData.global = j.data).catch(() => signalsData.global = signalsData.global || false),
+/* ---------- Bitcoin: sparkline + cycle indicators ---------- */
+async function loadBTC() {
+  const [d1, w1, h1] = await Promise.all([klines("BTCUSDT", "1d", 1000), klines("BTCUSDT", "1w", 300), klines("BTCUSDT", "1h", 168)]);
+  S.btcDaily = d1.map(k => ({ t: k[0], v: +k[4] }));
+  spark($("btc-spark"), h1.map(k => ({ t: k[0], v: +k[4] })), "var(--btc)", usd, dHour);
+
+  const closes = S.btcDaily.map(p => p.v), price = closes[closes.length - 1];
+  const ma200 = sma(closes, 200);
+  const mayer = price / ma200;
+  tween($("mayer-val"), mayer, v => fmt(v, 2));
+  $("mayer-mk").style.left = clamp((mayer - .5) / 2, 0, 1) * 100 + "%";
+  const [mLbl, mCls] = mayer < .8 ? ["Zone d'achat", "up"] : mayer < 1 ? ["Sous la MM200", "warn"] : mayer < 1.5 ? ["Tendance saine", "up"] : mayer < 2.4 ? ["Euphorie", "warn"] : ["Surchauffe", "down"];
+  setChip($("mayer-lbl"), mLbl, mCls);
+
+  const wma = sma(w1.map(k => +k[4]), 200);
+  $("wma-val").textContent = isNaN(wma) ? "—" : pct((price / wma - 1) * 100, 0);
+  const pi = sma(closes, 111) / (2 * sma(closes, 350));
+  $("pi-val").innerHTML = `<span class="${pi >= .95 ? "down" : pi >= .8 ? "warn" : ""}">${fmt(pi * 100, 0)} %</span>`;
+  const r = rsi(closes, 14);
+  $("rsi-val").innerHTML = `${fmt(r, 0)} <span class="muted">· ${r > 70 ? "suracheté" : r < 30 ? "survendu" : "neutre"}</span>`;
+
+  S.factors.trend = { v: clamp((price / ma200 - 1) / .25), name: "Tendance BTC", txt: pct((price / ma200 - 1) * 100, 0) + " / MM200" };
+  renderRegime(); updateCorr();
+  refreshed("t-btc", "btc-upd"); refreshed("t-cycle", "cycle-upd");
+}
+function rsi(c, n) {
+  let g = 0, l = 0;
+  for (let i = 1; i <= n; i++) { const d = c[i] - c[i - 1]; d > 0 ? g += d : l -= d; }
+  g /= n; l /= n;
+  for (let i = n + 1; i < c.length; i++) { const d = c[i] - c[i - 1]; g = (g * (n - 1) + Math.max(d, 0)) / n; l = (l * (n - 1) + Math.max(-d, 0)) / n; }
+  return l === 0 ? 100 : 100 - 100 / (1 + g / l);
+}
+
+/* ---------- ETH/BTC ---------- */
+async function loadETHBTC() {
+  const k = await klines("ETHBTC", "1d", 90);
+  const pts = k.map(x => ({ t: x[0], v: +x[4] }));
+  const last = pts[pts.length - 1].v, m30 = pts[pts.length - 31].v;
+  tween($("ethbtc-val"), last, v => fmt(v, 5));
+  const c = (last / m30 - 1) * 100;
+  setChip($("ethbtc-chg"), pct(c, 1) + " 30 j", sign(c));
+  spark($("ethbtc-spark"), pts, "var(--eth)", v => fmt(v, 5), dDay);
+}
+
+/* ---------- DXY (recalculé à partir des taux de change BCE) ---------- */
+async function loadDXY() {
+  const start = new Date(Date.now() - 160 * 864e5).toISOString().slice(0, 10);
+  const j = await getJSON([
+    `https://api.frankfurter.dev/v1/${start}..?base=USD&symbols=EUR,JPY,GBP,CAD,SEK,CHF`,
+    `https://api.frankfurter.app/${start}..?from=USD&to=EUR,JPY,GBP,CAD,SEK,CHF`,
   ]);
-  paintKpis();
-}
-
-/* ---------- Ticker ---------- */
-function renderTicker() {
-  tvWidget($("#ticker"), "ticker-tape", {
-    symbols: TICKER, showSymbolLogo: true, isTransparent: true,
-    displayMode: "adaptive", colorTheme: "dark", locale: "fr",
+  const pts = Object.keys(j.rates).sort().map(d => {
+    const r = j.rates[d];
+    return { t: Date.parse(d + "T00:00:00Z"), d, v: 50.14348112 * r.EUR ** .576 * r.JPY ** .136 * r.GBP ** .119 * r.CAD ** .091 * r.SEK ** .042 * r.CHF ** .036 };
   });
+  S.dxy = pts;
+  const vals = pts.map(p => p.v), last = vals[vals.length - 1], prev = vals[vals.length - 2];
+  const ma50 = sma(vals, 50), dev = (last / ma50 - 1) * 100, chg = (last / prev - 1) * 100;
+  tween($("dxy-val"), last, v => fmt(v, 2));
+  setChip($("dxy-chg"), pct(chg, 2), sign(chg));
+  $("dxy-ma").innerHTML = `vs MM50 <b>${pct(dev, 2)}</b> · <span class="${dev < 0 ? "up" : "down"}">${dev < 0 ? "favorable crypto" : "vent contraire"}</span>`;
+  spark($("dxy-spark"), pts.slice(-90), "var(--macro)", v => fmt(v, 2), dDay);
+  setTape("DXY", fmt(last, 2), chg);
+  S.factors.dollar = { v: clamp(-dev / 2), name: "Dollar", txt: pct(dev, 1) + " / MM50" };
+  renderRegime(); updateCorr();
+  refreshed("t-dxy", "dxy-upd", "BCE · " + new Date(pts[pts.length - 1].t).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }));
+}
+function updateCorr() {
+  if (!S.dxy || !S.btcDaily) return;
+  const btc = new Map(S.btcDaily.map(p => [new Date(p.t).toISOString().slice(0, 10), p.v]));
+  const a = [], b = [];
+  for (let i = 1; i < S.dxy.length; i++) {
+    const p0 = btc.get(S.dxy[i - 1].d), p1 = btc.get(S.dxy[i].d);
+    if (p0 && p1) { a.push(p1 / p0 - 1); b.push(S.dxy[i].v / S.dxy[i - 1].v - 1); }
+  }
+  const x = a.slice(-30), y = b.slice(-30);
+  if (x.length < 10) return;
+  const mx = x.reduce((s, v) => s + v, 0) / x.length, my = y.reduce((s, v) => s + v, 0) / y.length;
+  let sxy = 0, sxx = 0, syy = 0;
+  x.forEach((v, i) => { sxy += (v - mx) * (y[i] - my); sxx += (v - mx) ** 2; syy += (y[i] - my) ** 2; });
+  const c = sxy / Math.sqrt(sxx * syy);
+  $("corr-val").textContent = fmt(c, 2) + (c < -.3 ? " inverse" : c > .3 ? " positive" : " faible");
+  const bar = $("corr-bar").firstElementChild;
+  bar.style.left = (c < 0 ? 50 + c * 50 : 50) + "%";
+  bar.style.width = Math.abs(c) * 50 + "%";
+  bar.style.background = c < 0 ? "var(--macro)" : "var(--warn)";
 }
 
-/* ---------- Mode écran (rotation + écran allumé) ---------- */
-let rotateTimer = null, wakeLock = null;
-async function setRotate(on) {
-  state.rotate = on;
-  $("#rotate").setAttribute("aria-pressed", String(on));
-  clearInterval(rotateTimer);
-  if (on) {
-    rotateTimer = setInterval(() => {
-      const i = TABS.findIndex(t => t.id === state.tab);
-      selectTab(TABS[(i + 1) % TABS.length].id);
-    }, ROTATE_EVERY_MS);
-    try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {}
-  } else if (wakeLock) {
-    try { await wakeLock.release(); } catch {}
-    wakeLock = null;
-  }
+/* ---------- Fear & Greed ---------- */
+const FNG_FR = { "Extreme Fear": "PEUR EXTRÊME", "Fear": "PEUR", "Neutral": "NEUTRE", "Greed": "AVIDITÉ", "Extreme Greed": "AVIDITÉ EXTRÊME" };
+async function loadFNG() {
+  const j = await getJSON("https://api.alternative.me/fng/?limit=31");
+  const d = j.data, v = +d[0].value;
+  setGauge($("fng-gauge"), v, FNG_FR[d[0].value_classification] || d[0].value_classification.toUpperCase());
+  const hist = (el, i) => { if (!d[i]) return; const x = +d[i].value; $(el).innerHTML = `${x} <span class="muted">· ${(FNG_FR[d[i].value_classification] || "").toLowerCase()}</span>`; };
+  hist("fng-1", 1); hist("fng-7", 7); hist("fng-30", 30);
+  setTape("FNG", String(v), null);
+  S.factors.sentiment = { v: (v - 50) / 50, name: "Sentiment", txt: "F&G " + v };
+  renderRegime();
+  refreshed("t-fng", "fng-upd");
 }
-$("#rotate").onclick = () => setRotate(!state.rotate);
+
+/* ---------- Dérivés (Binance Futures) ---------- */
+async function loadDerivs() {
+  const [prem, oi, ls] = await Promise.allSettled([
+    getJSON(`${FAPI}/fapi/v1/premiumIndex?symbol=BTCUSDT`),
+    getJSON(`${FAPI}/futures/data/openInterestHist?symbol=BTCUSDT&period=1d&limit=8`),
+    getJSON(`${FAPI}/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=1h&limit=1`),
+  ]);
+  let funding = prem.status === "fulfilled" ? +prem.value.lastFundingRate : null;
+  if (funding === null) {
+    try { funding = +(await getJSON("https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USDT-SWAP")).data[0].fundingRate; } catch {}
+  }
+  if (funding !== null && !isNaN(funding)) {
+    const f = funding * 100;
+    tween($("fund-val"), f, v => (v > 0 ? "+" : "") + fmt(v, 4) + " %");
+    $("fund-apr").textContent = "≈ " + pct(f * 3 * 365, 1) + " / an";
+    const [l, c] = f > .03 ? ["Surchauffe", "down"] : f > .012 ? ["Longs chargés", "warn"] : f < 0 ? ["Shorts dominants", "up"] : ["Neutre", ""];
+    setChip($("fund-lbl"), l, c);
+  }
+  if (oi.status === "fulfilled" && oi.value.length) {
+    const a = oi.value, last = +a[a.length - 1].sumOpenInterestValue, first = +a[0].sumOpenInterestValue;
+    tween($("oi-val"), last, money);
+    const c = (last / first - 1) * 100;
+    setChip($("oi-chg"), pct(c, 1) + " 7 j", c > 10 ? "warn" : sign(c));
+  }
+  if (ls.status === "fulfilled" && ls.value.length) {
+    const long = +ls.value[0].longAccount * 100;
+    const [li, si] = $("ls-split").children;
+    li.style.width = long + "%"; si.style.width = (100 - long) + "%";
+    $("ls-long").textContent = "Long " + fmt(long, 1) + " %";
+    $("ls-short").textContent = "Short " + fmt(100 - long, 1) + " %";
+  }
+  if (funding === null && oi.status === "rejected") throw new Error("derivs");
+  refreshed("t-deriv", "deriv-upd");
+}
+
+/* ---------- CoinGecko: dominance + altseason ---------- */
+const STABLES = new Set(["usdt", "usdc", "dai", "fdusd", "usde", "usds", "tusd", "pyusd", "usdd", "usd1", "busd", "susde", "usdtb", "rlusd", "usd0", "gusd", "frax", "lusd", "eurc", "usdx", "buidl", "usyc", "bfusd", "susds"]);
+const WRAPPED = /^(w|st|wst|cb|we|r|m|lb|sol|j|b)(btc|eth)$|^(weeth|reth|meth|ezeth|rseth|wbeth|lseth|oseth|cmeth|solvbtc|lbtc|tbtc|btcb|bsc-usd|jitosol|msol|bnsol)$/;
+async function loadGecko() {
+  const [g, m] = await Promise.all([
+    getJSON("https://api.coingecko.com/api/v3/global"),
+    getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=120&page=1&sparkline=false&price_change_percentage=30d"),
+  ]);
+  const p = g.data.market_cap_percentage;
+  const stable = Object.entries(p).filter(([k]) => STABLES.has(k)).reduce((s, [, v]) => s + v, 0);
+  const parts = [p.btc, p.eth, stable, Math.max(0, 100 - p.btc - p.eth - stable)];
+  [...$("dom-stack").children].forEach((el, i) => el.style.width = parts[i] + "%");
+  ["dom-btc", "dom-eth", "dom-stable", "dom-other"].forEach((id, i) => tween($(id), parts[i], v => fmt(v, 1) + " %"));
+  refreshed("t-dom", "dom-upd");
+
+  const btc = m.find(c => c.id === "bitcoin");
+  const btc30 = btc ? btc.price_change_percentage_30d_in_currency : 0;
+  const alts = m.filter(c => c.id !== "bitcoin" && !STABLES.has(c.symbol.toLowerCase()) && !WRAPPED.test(c.symbol.toLowerCase())
+    && !(Math.abs(c.current_price - 1) < .03 && Math.abs(c.price_change_percentage_30d_in_currency || 0) < 2)
+    && typeof c.price_change_percentage_30d_in_currency === "number").slice(0, 50);
+  const beat = alts.filter(c => c.price_change_percentage_30d_in_currency > btc30).length;
+  const idx = Math.round(beat / alts.length * 100);
+  tween($("alt-val"), idx, v => fmt(v, 0));
+  $("alt-mk").style.left = idx + "%";
+  const [l, c] = idx >= 75 ? ["Altseason", "up"] : idx <= 25 ? ["Saison BTC", "warn"] : ["Mixte", ""];
+  setChip($("alt-lbl"), l, c);
+  const tops = [...alts].sort((a, b) => b.price_change_percentage_30d_in_currency - a.price_change_percentage_30d_in_currency).slice(0, 3);
+  $("alt-tops").innerHTML = tops.map((t, i) => {
+    const v = t.price_change_percentage_30d_in_currency;
+    return `<span class="chip ${sign(v)}" style="animation-delay:${.3 + i * .12}s">${t.symbol.toUpperCase()} ${pct(v, 0)}</span>`;
+  }).join("") + `<span class="chip" style="animation-delay:.8s">BTC ${pct(btc30, 0)}</span>`;
+  refreshed("t-alt", "alt-upd");
+}
+
+/* ---------- Stablecoins (DefiLlama) ---------- */
+async function loadStables() {
+  const a = await getJSON("https://stablecoins.llama.fi/stablecoincharts/all");
+  const tot = x => Object.values(x.totalCirculatingUSD || {}).reduce((s, v) => s + v, 0);
+  const last = tot(a[a.length - 1]), m30 = tot(a[a.length - 31]);
+  const c = (last / m30 - 1) * 100;
+  tween($("stab-val"), last, money);
+  setChip($("stab-chg"), pct(c, 1) + " 30 j", sign(c));
+  S.factors.liquidity = { v: clamp(c / 3), name: "Liquidité", txt: "Stables " + pct(c, 1) };
+  renderRegime();
+  refreshed("t-liq", "liq-upd");
+}
+
+/* ---------- Halving (mempool.space) ---------- */
+async function loadHalving() {
+  const h = +(await getJSON("https://mempool.space/api/blocks/tip/height", { text: true }));
+  const next = Math.ceil((h + 1) / 210000) * 210000, left = next - h;
+  const days = left * 10 / 1440;
+  const when = new Date(Date.now() + days * 864e5);
+  $("halv-val").textContent = "≈ " + fmt(days, 0) + " j";
+  $("halv-date").textContent = "· " + when.toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
+  $("halv-bar").style.width = ((h - (next - 210000)) / 210000 * 100) + "%";
+}
+
+/* ---------- FOMC countdown ---------- */
+function tickFOMC() {
+  const now = Date.now(), next = FOMC.map(Date.parse).find(t => t > now);
+  if (!next) { $("fomc-date").textContent = "à renseigner"; $("fomc-cd").textContent = "Ajoute les dates 2027"; return; }
+  $("fomc-date").textContent = new Date(next).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  let s = Math.floor((next - now) / 1000);
+  const d = Math.floor(s / 86400); s %= 86400;
+  const h = Math.floor(s / 3600); s %= 3600;
+  const m = Math.floor(s / 60); s %= 60;
+  const p = n => String(n).padStart(2, "0");
+  $("fomc-cd").innerHTML = `${d}<span>j</span>${p(h)}<span>h</span>${p(m)}<span>min</span>${p(s)}<span>s</span>`;
+}
+
+/* ---------- Régime de marché (score composite) ---------- */
+function renderRegime() {
+  const order = ["dollar", "trend", "sentiment", "liquidity"];
+  const f = order.map(k => S.factors[k]).filter(Boolean);
+  $("regime-factors").innerHTML = order.map(k => {
+    const x = S.factors[k];
+    if (!x) return "";
+    const v = x.v;
+    return `<div class="factor"><span>${x.name}</span><b>${x.txt}</b><span class="dbar"><i style="left:${v < 0 ? 50 + v * 50 : 50}%;width:${Math.abs(v) * 50}%;background:${v >= 0 ? "var(--up)" : "var(--down)"}"></i></span></div>`;
+  }).join("");
+  if (!f.length) return;
+  const score = Math.round(50 + 50 * f.reduce((s, x) => s + x.v, 0) / f.length);
+  const [lbl, col] = score < 25 ? ["RISK-OFF", "var(--down)"] : score < 42 ? ["PRUDENT", "#f97316"] : score < 58 ? ["NEUTRE", "#eab308"] : score < 75 ? ["FAVORABLE", "#84cc16"] : ["RISK-ON", "var(--up)"];
+  setGauge($("regime-gauge"), score, lbl);
+  const chip = $("regime-chip");
+  chip.innerHTML = `<i class="dot" style="background:${col};margin:0"></i>Régime ${lbl.toLowerCase()} · ${score}`;
+  chip.style.borderColor = col;
+}
+
+/* ---------- Actualités ---------- */
+const TAGS = [
+  { re: /\b(fed|fomc|powell|dollar|dxy|inflation|cpi|pce|taux|rates?|emploi|nfp|chômage|bce|ecb|lagarde|trésor|treasury|récession|recession|tarifs?|douane|yen|boj|pib|gdp)\b/i, name: "Macro", c: "var(--macro)" },
+  { re: /\betfs?\b/i, name: "ETF", c: "var(--eth)" },
+  { re: /\b(sec|mica|amf|régulat\w*|regulat\w*|loi|sénat|congrès|stablecoin act|genius)\b/i, name: "Régulation", c: "var(--warn)" },
+  { re: /\b(bitcoin|btc)\b/i, name: "Bitcoin", c: "var(--btc)" },
+  { re: /\b(ethereum|ether|eth)\b/i, name: "Ethereum", c: "var(--eth)" },
+];
+const decode = s => { const t = document.createElement("textarea"); t.innerHTML = s.replace(/<[^>]*>/g, ""); return t.value.trim(); };
+async function loadNews() {
+  const res = await Promise.allSettled(FEEDS.map(f =>
+    getJSON(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`).then(j => (j.items || []).map(it => ({ ...it, src: f.name })))));
+  let items = res.filter(r => r.status === "fulfilled").flatMap(r => r.value);
+  const seen = new Set();
+  items = items.map(it => ({
+    title: decode(it.title || ""), link: it.link, src: it.src,
+    t: Date.parse((it.pubDate || "").replace(" ", "T") + "Z") || Date.now(),
+    img: it.thumbnail || (it.enclosure && /image/.test(it.enclosure.type || "") ? it.enclosure.link : (it.enclosure && it.enclosure.link && /\.(jpe?g|png|webp)/i.test(it.enclosure.link) ? it.enclosure.link : "")),
+  })).filter(it => it.title && !seen.has(it.title) && seen.add(it.title)).sort((a, b) => b.t - a.t).slice(0, 30);
+  if (!items.length) throw new Error("no news");
+  const ago = t => { const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} j`; };
+  $("news-track").innerHTML = items.map((it, i) => {
+    const tag = TAGS.find(t => t.re.test(it.title)) || { name: "Crypto", c: "var(--other)" };
+    const fresh = Date.now() - it.t < 3600_000;
+    return `<a class="n-item" href="${it.link}" target="_blank" rel="noopener" style="animation-delay:${Math.min(i, 8) * 80}ms">
+      <div><div class="n-meta"><span class="n-tag" style="--c:${tag.c}">${tag.name}</span><span>${it.src}</span><span>·</span><span>${ago(it.t)}</span>${fresh ? '<span class="n-new">NOUVEAU</span>' : ""}</div>
+      <div class="n-title"></div></div>
+      ${it.img ? `<img class="n-thumb" src="${it.img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</a>`;
+  }).join("");
+  $("news-track").querySelectorAll(".n-title").forEach((el, i) => el.textContent = items[i].title);
+  $("news-track").style.transform = "none";
+  $("news-upd").textContent = items.length + " articles · maj " + hhmm();
+}
+// Auto-scrolling carousel; a touch pauses it and allows manual scrolling for 30 s.
+let newsPausedUntil = 0;
+$("news-list").addEventListener("pointerdown", () => { newsPausedUntil = Date.now() + 30_000; $("news-list").classList.add("manual"); });
+setInterval(() => {
+  const list = $("news-list"), track = $("news-track");
+  if (Date.now() < newsPausedUntil) return;
+  if (list.classList.contains("manual")) { list.classList.remove("manual"); list.scrollTop = 0; }
+  const first = track.firstElementChild;
+  if (!first || !first.classList.contains("n-item") || track.scrollHeight <= list.clientHeight) return;
+  track.style.transition = "transform .9s cubic-bezier(.65,0,.35,1)";
+  track.style.transform = `translateY(-${first.offsetHeight}px)`;
+  setTimeout(() => {
+    track.style.transition = "none"; track.appendChild(first); track.style.transform = "none";
+  }, 950);
+}, 7000);
+
+/* =====================================================================
+   Scheduler
+   ===================================================================== */
+function every(fn, ms, updId) {
+  const run = () => fn().catch(e => { console.warn(fn.name, e); if (updId) failed(updId); });
+  run(); setInterval(run, ms);
+}
+function tickClock() {
+  const d = new Date();
+  $("clock").textContent = d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }) + " · " + hhmm(d);
+}
+
+buildTape();
+pollTickers().catch(() => {});
+connectWS();
+every(loadBTC, 5 * 60_000, "btc-upd");
+every(loadETHBTC, 5 * 60_000);
+every(loadDXY, 30 * 60_000, "dxy-upd");
+every(loadFNG, 10 * 60_000, "fng-upd");
+every(loadDerivs, 60_000, "deriv-upd");
+every(loadGecko, 5 * 60_000, "dom-upd");
+every(loadStables, 30 * 60_000, "liq-upd");
+every(loadHalving, 15 * 60_000);
+every(loadNews, 10 * 60_000, "news-upd");
+tickFOMC(); setInterval(tickFOMC, 1000);
+tickClock(); setInterval(tickClock, 15_000);
+// Rechargement complet toutes les 6 h pour garder Safari léger en affichage permanent.
+setTimeout(() => location.reload(), 6 * 3600_000);
+
+/* ---------- Écran allumé (Wake Lock) ---------- */
+let wakeLock = null;
+$("wake").onclick = async () => {
+  const b = $("wake");
+  if (wakeLock) { try { await wakeLock.release(); } catch {} wakeLock = null; b.setAttribute("aria-pressed", "false"); return; }
+  try { wakeLock = await navigator.wakeLock.request("screen"); b.setAttribute("aria-pressed", "true"); }
+  catch { b.textContent = "Non supporté"; }
+};
 document.addEventListener("visibilitychange", async () => {
-  if (document.visibilityState === "visible" && state.rotate) {
-    try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {}
+  if (document.visibilityState === "visible" && $("wake").getAttribute("aria-pressed") === "true") {
+    try { wakeLock = await navigator.wakeLock.request("screen"); } catch {}
   }
 });
-
-/* ---------- Clock + housekeeping ---------- */
-function tick() {
-  $("#clock").textContent = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-}
-setInterval(tick, 10_000); tick();
-setInterval(() => { if (currentTab().signals) loadSignalsData(true); }, 5 * 60_000);
-// Recharge complète toutes les 6 h pour éviter que Safari n'accumule de la mémoire en mode affichage permanent.
-setTimeout(() => location.reload(), 6 * 3600_000);
-document.addEventListener("keydown", e => { if (e.key === "Escape") collapse(); });
-
-renderTabs();
-renderIntervals();
-renderTicker();
-renderMain();
 </script>
 </body>
 </html>
