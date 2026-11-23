@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Macro Crypto">
 <meta name="theme-color" content="#07090d">
 <link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="details.css">
 <title>Macro Crypto</title>
 <style>
   :root {
@@ -73,6 +74,9 @@
     border: 1px solid var(--line); border-radius: var(--r);
     animation: rise .7s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 70ms);
   }
+  .tile { cursor: pointer; transition: transform .18s var(--ease-out), border-color .3s; }
+  .tile:active { transform: scale(.985); border-color: #2a3446; }
+  .tile .t-head::after { content: "›"; font-size: 18px; line-height: 0; color: var(--faint); margin-left: -4px; }
   .tile::after { /* subtle sweep of light when a tile receives new data */
     content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
     background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.05) 50%, transparent 70%);
@@ -483,8 +487,9 @@ function setTape(sym, price, chg) {
 }
 
 /* ---------- Live prices (WebSocket, REST fallback) ---------- */
-function onTicker(sym, last, open, high, low) {
+function onTicker(sym, last, open, high, low, vol) {
   const chg = (last / open - 1) * 100;
+  (S.tick = S.tick || {})[sym] = { last, open, high, low, vol, chg };
   const prev = S.prices[sym];
   S.prices[sym] = last;
   setTape(sym, usd(last), chg);
@@ -502,14 +507,14 @@ function onTicker(sym, last, open, high, low) {
 async function pollTickers() {
   const syms = TAPE.filter(t => t.sym.endsWith("USDT")).map(t => t.sym);
   const data = await binance(`/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(syms))}`);
-  data.forEach(d => onTicker(d.symbol, +d.lastPrice, +d.openPrice, +d.highPrice, +d.lowPrice));
+  data.forEach(d => onTicker(d.symbol, +d.lastPrice, +d.openPrice, +d.highPrice, +d.lowPrice, +d.quoteVolume));
 }
 let ws, wsHost = 0, wsRetry = 0, pollTimer = null;
 function connectWS() {
   const streams = TAPE.filter(t => t.sym.endsWith("USDT")).map(t => t.sym.toLowerCase() + "@miniTicker").join("/");
   try { ws = new WebSocket(`${BINANCE_WS[wsHost % BINANCE_WS.length]}?streams=${streams}`); } catch { return scheduleWS(); }
   ws.onopen = () => { wsRetry = 0; setLive(true); clearInterval(pollTimer); pollTimer = null; };
-  ws.onmessage = e => { const d = JSON.parse(e.data).data; if (d) onTicker(d.s, +d.c, +d.o, +d.h, +d.l); };
+  ws.onmessage = e => { const d = JSON.parse(e.data).data; if (d) onTicker(d.s, +d.c, +d.o, +d.h, +d.l, +d.q); };
   ws.onclose = ws.onerror = () => { if (ws._closed) return; ws._closed = true; setLive(false); scheduleWS(); };
 }
 function scheduleWS() {
@@ -525,6 +530,7 @@ function setLive(on) {
 /* ---------- Bitcoin: sparkline + cycle indicators ---------- */
 async function loadBTC() {
   const [d1, w1, h1] = await Promise.all([klines("BTCUSDT", "1d", 1000), klines("BTCUSDT", "1w", 300), klines("BTCUSDT", "1h", 168)]);
+  S.btcD = d1; S.btcW = w1; S.btcH = h1;
   S.btcDaily = d1.map(k => ({ t: k[0], v: +k[4] }));
   spark($("btc-spark"), h1.map(k => ({ t: k[0], v: +k[4] })), "var(--btc)", usd, dHour);
 
@@ -615,6 +621,7 @@ const FNG_FR = { "Extreme Fear": "PEUR EXTRÊME", "Fear": "PEUR", "Neutral": "NE
 async function loadFNG() {
   const j = await getJSON("https://api.alternative.me/fng/?limit=31");
   const d = j.data, v = +d[0].value;
+  S.fng = d;
   setGauge($("fng-gauge"), v, FNG_FR[d[0].value_classification] || d[0].value_classification.toUpperCase());
   const hist = (el, i) => { if (!d[i]) return; const x = +d[i].value; $(el).innerHTML = `${x} <span class="muted">· ${(FNG_FR[d[i].value_classification] || "").toLowerCase()}</span>`; };
   hist("fng-1", 1); hist("fng-7", 7); hist("fng-30", 30);
@@ -662,11 +669,19 @@ async function loadDerivs() {
 /* ---------- CoinGecko: dominance + altseason ---------- */
 const STABLES = new Set(["usdt", "usdc", "dai", "fdusd", "usde", "usds", "tusd", "pyusd", "usdd", "usd1", "busd", "susde", "usdtb", "rlusd", "usd0", "gusd", "frax", "lusd", "eurc", "usdx", "buidl", "usyc", "bfusd", "susds"]);
 const WRAPPED = /^(w|st|wst|cb|we|r|m|lb|sol|j|b)(btc|eth)$|^(weeth|reth|meth|ezeth|rseth|wbeth|lseth|oseth|cmeth|solvbtc|lbtc|tbtc|btcb|bsc-usd|jitosol|msol|bnsol)$/;
+/** Top 50 altcoins (sans BTC, stablecoins ni jetons « wrapped ») ayant une performance sur la période. */
+function pickAlts(m, period) {
+  const k = "price_change_percentage_" + period + "_in_currency";
+  return m.filter(c => c.id !== "bitcoin" && !STABLES.has(c.symbol.toLowerCase()) && !WRAPPED.test(c.symbol.toLowerCase())
+    && !(Math.abs(c.current_price - 1) < .03 && Math.abs(c.price_change_percentage_30d_in_currency || 0) < 2)
+    && typeof c[k] === "number").slice(0, 50);
+}
 async function loadGecko() {
   const [g, m] = await Promise.all([
     getJSON("https://api.coingecko.com/api/v3/global"),
-    getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=120&page=1&sparkline=false&price_change_percentage=30d"),
+    getJSON("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=120&page=1&sparkline=false&price_change_percentage=24h,7d,30d"),
   ]);
+  S.global = g.data; S.markets = m;
   const p = g.data.market_cap_percentage;
   const stable = Object.entries(p).filter(([k]) => STABLES.has(k)).reduce((s, [, v]) => s + v, 0);
   const parts = [p.btc, p.eth, stable, Math.max(0, 100 - p.btc - p.eth - stable)];
@@ -676,11 +691,10 @@ async function loadGecko() {
 
   const btc = m.find(c => c.id === "bitcoin");
   const btc30 = btc ? btc.price_change_percentage_30d_in_currency : 0;
-  const alts = m.filter(c => c.id !== "bitcoin" && !STABLES.has(c.symbol.toLowerCase()) && !WRAPPED.test(c.symbol.toLowerCase())
-    && !(Math.abs(c.current_price - 1) < .03 && Math.abs(c.price_change_percentage_30d_in_currency || 0) < 2)
-    && typeof c.price_change_percentage_30d_in_currency === "number").slice(0, 50);
+  const alts = pickAlts(m, "30d");
   const beat = alts.filter(c => c.price_change_percentage_30d_in_currency > btc30).length;
   const idx = Math.round(beat / alts.length * 100);
+  S.altIdx = idx;
   tween($("alt-val"), idx, v => fmt(v, 0));
   $("alt-mk").style.left = idx + "%";
   const [l, c] = idx >= 75 ? ["Altseason", "up"] : idx <= 25 ? ["Saison BTC", "warn"] : ["Mixte", ""];
@@ -696,6 +710,7 @@ async function loadGecko() {
 /* ---------- Stablecoins (DefiLlama) ---------- */
 async function loadStables() {
   const a = await getJSON("https://stablecoins.llama.fi/stablecoincharts/all");
+  S.stables = a;
   const tot = x => Object.values(x.totalCirculatingUSD || {}).reduce((s, v) => s + v, 0);
   const last = tot(a[a.length - 1]), m30 = tot(a[a.length - 31]);
   const c = (last / m30 - 1) * 100;
@@ -709,6 +724,7 @@ async function loadStables() {
 /* ---------- Halving (mempool.space) ---------- */
 async function loadHalving() {
   const h = +(await getJSON("https://mempool.space/api/blocks/tip/height", { text: true }));
+  S.height = h;
   const next = Math.ceil((h + 1) / 210000) * 210000, left = next - h;
   const days = left * 10 / 1440;
   const when = new Date(Date.now() + days * 864e5);
@@ -840,6 +856,17 @@ document.addEventListener("visibilitychange", async () => {
     try { wakeLock = await navigator.wakeLock.request("screen"); } catch {}
   }
 });
+
+/* ---------- Ouverture des vues détaillées ---------- */
+document.querySelectorAll(".tile").forEach(t => {
+  let sx = 0, sy = 0;
+  t.addEventListener("pointerdown", e => { sx = e.clientX; sy = e.clientY; });
+  t.addEventListener("click", e => {
+    if (Math.hypot(e.clientX - sx, e.clientY - sy) > 12) return; // glissement sur une courbe : pas d'ouverture
+    window.openDetail && openDetail(t.id.slice(2), t);
+  });
+});
 </script>
+<script src="details.js"></script>
 </body>
 </html>

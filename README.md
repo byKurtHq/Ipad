@@ -23,6 +23,18 @@ Price bar at the bottom: BTC, ETH, SOL, XRP, BNB, DOGE, Gold (PAXG), DXY, Fear &
 - Tap the news feed to scroll it by hand (auto-scroll resumes after 30 s).
 - **Écran allumé** (keep screen on): stops the iPad from going to sleep.
 
+## Detail views
+
+Tap any tile to open a full-screen panel (zoom animation) with:
+- **interactive charts** with time ranges (24 h → several years), moving averages, zones and history;
+- the **current reading** of the indicator (e.g. "Bullish trend", "Leverage rising", "Phase 3/4 of the rotation");
+- the **key figures** (performance over several periods, highs/lows, averages, thresholds);
+- **how to read it**: benchmarks and explanations.
+
+Examples: DXY components and their 1-month effect, rolling BTC/DXY correlation, reconstructed history of the regime score, funding / open interest / long-short history, full ranking of the top 50 altcoins vs BTC, Mayer Multiple / Pi Cycle / 200-week MA / RSI, the main stablecoins, the Fed calendar and the state of the Bitcoin network.
+
+The code lives in `details.js` and `details.css`.
+
 ## `charts.html` — Charts
 
 The TradingView version (live charts grouped into tabs), reachable from the **Graphiques** button.
