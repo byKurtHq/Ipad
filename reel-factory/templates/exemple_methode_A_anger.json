@@ -1,0 +1,664 @@
+{
+ "_doc": "Modele : Reel n°1 (reference Dd1fqwSOVuo « My anger isn't because... ») reconstruit avec la methode A. 395 images a 24 i/s = 16,46 s. Copier ce fichier dans 03_projects/<ID>/spec.json et adapter.",
+ "id": "Dd1fqwSOVuo",
+ "ref": "Dd1fqwSOVuo",
+ "name": "001_anger_Dd1fqwSOVuo",
+ "fps": 24,
+ "canvas": [
+  1080,
+  1920
+ ],
+ "outputs": {
+  "landscape": true
+ },
+ "grade": "G1",
+ "exposure": "auto",
+ "exposure_target": 0.4,
+ "speed": "auto",
+ "shots": [
+  {
+   "name": "f0",
+   "clip": "First Vlog/C0490",
+   "start": 45.0,
+   "frames": 1,
+   "z0": 2.0,
+   "z1": 2.0,
+   "cx": 0.55,
+   "cy": 0.3,
+   "post": [
+    "RGB"
+   ],
+   "note": "flash 1 image, decalage RVB"
+  },
+  {
+   "name": "f1",
+   "clip": "First Vlog/C0488",
+   "start": 23.0,
+   "frames": 1,
+   "z0": 1.5,
+   "z1": 1.5,
+   "cx": 0.5,
+   "cy": 0.35,
+   "post": [
+    "RGB"
+   ]
+  },
+  {
+   "name": "f2",
+   "clip": "26-10-26/C0339",
+   "start": 0.5,
+   "frames": 1,
+   "z0": 1.1,
+   "z1": 1.1,
+   "cx": 0.5,
+   "cy": 0.5,
+   "post": [
+    "RGB"
+   ],
+   "note": "insert sans personne"
+  },
+  {
+   "name": "f3",
+   "clip": "First Vlog/C0490",
+   "start": 24.0,
+   "frames": 1,
+   "z0": 2.0,
+   "z1": 2.0,
+   "cx": 0.64,
+   "cy": 0.3,
+   "post": [
+    "RGB"
+   ]
+  },
+  {
+   "name": "s1",
+   "clip": "First Vlog/C0490",
+   "start": 6.0,
+   "frames": 91,
+   "z0": 1.9,
+   "z1": 1.97,
+   "cx": 0.66,
+   "cy": 0.27,
+   "post": [
+    "eq=gamma=1.2"
+   ],
+   "note": "assis sur le banc, main sur la tete ; silhouette images 4/6/8"
+  },
+  {
+   "name": "s2",
+   "clip": "First Vlog/C0488",
+   "start": 19.0,
+   "frames": 48,
+   "z0": 1.4,
+   "z1": 1.46,
+   "cx": 0.42,
+   "cy": 0.4,
+   "post": [
+    "eq=gamma=1.2"
+   ]
+  },
+  {
+   "name": "s3",
+   "clip": "First Vlog/C0490",
+   "start": 42.0,
+   "frames": 48,
+   "z0": 2.0,
+   "z1": 2.07,
+   "cx": 0.62,
+   "cy": 0.3,
+   "post": [
+    "eq=gamma=1.2"
+   ]
+  },
+  {
+   "name": "s4",
+   "clip": "17-11-26/C0533",
+   "start": 5.0,
+   "frames": 52,
+   "z0": 2.5,
+   "z1": 2.6,
+   "cx": 0.76,
+   "cy": 0.4,
+   "note": "insert"
+  },
+  {
+   "name": "s5",
+   "clip": "First Vlog/C0490",
+   "start": 44.5,
+   "frames": 44,
+   "z0": 2.0,
+   "z1": 2.06,
+   "cx": 0.55,
+   "cy": 0.3,
+   "post": [
+    "eq=gamma=1.2"
+   ]
+  },
+  {
+   "name": "s6",
+   "clip": "First Vlog/C0488",
+   "start": 22.5,
+   "frames": 77,
+   "z0": 1.5,
+   "z1": 1.6,
+   "cx": 0.5,
+   "cy": 0.35,
+   "post": [
+    "eq=gamma=1.2"
+   ]
+  },
+  {
+   "name": "s7",
+   "clip": "First Vlog/C0490",
+   "start": 30.0,
+   "frames": 31,
+   "z0": 1.4,
+   "z1": 1.44,
+   "cx": 0.62,
+   "cy": 0.38,
+   "post": [
+    "eq=gamma=1.2"
+   ]
+  }
+ ],
+ "silhouettes": [
+  {
+   "shot": "s1",
+   "local": [
+    0,
+    2,
+    4
+   ],
+   "at": [
+    4,
+    6,
+    8
+   ]
+  }
+ ],
+ "text": {
+  "styles": {
+   "serif": {
+    "font": "didone",
+    "cap": 0.13,
+    "fit": [
+     "ANGER",
+     0.58
+    ],
+    "color": "white",
+    "grunge": {
+     "seed": 7,
+     "strength": 0.75,
+     "scale": 3,
+     "t1": 224,
+     "t2": 249
+    }
+   }
+  },
+  "events": [
+   {
+    "f0": 6,
+    "f1": 11,
+    "t0": 0.25,
+    "t1": 0.5,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "MY",
+    "color": "white"
+   },
+   {
+    "f0": 12,
+    "f1": 22,
+    "t0": 0.5,
+    "t1": 0.958,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "ANGER",
+    "color": "red"
+   },
+   {
+    "f0": 23,
+    "f1": 28,
+    "t0": 0.958,
+    "t1": 1.208,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "ISN'T",
+    "color": "white"
+   },
+   {
+    "f0": 29,
+    "f1": 40,
+    "t0": 1.208,
+    "t1": 1.708,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "parts": [
+     [
+      "BE",
+      "white"
+     ],
+     [
+      "CAUSE",
+      "red"
+     ]
+    ]
+   },
+   {
+    "f0": 41,
+    "f1": 49,
+    "t0": 1.708,
+    "t1": 2.083,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "I'M",
+    "color": "red"
+   },
+   {
+    "f0": 50,
+    "f1": 53,
+    "t0": 2.083,
+    "t1": 2.25,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "LIKE",
+    "color": "white"
+   },
+   {
+    "f0": 54,
+    "f1": 100,
+    "t0": 2.25,
+    "t1": 4.208,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "YOU",
+    "color": "red"
+   },
+   {
+    "f0": 101,
+    "f1": 108,
+    "t0": 4.208,
+    "t1": 4.542,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "MY",
+    "color": "white"
+   },
+   {
+    "f0": 109,
+    "f1": 114,
+    "t0": 4.542,
+    "t1": 4.792,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "ANGER",
+    "color": "red"
+   },
+   {
+    "f0": 115,
+    "f1": 119,
+    "t0": 4.792,
+    "t1": 5.0,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "IS",
+    "color": "white"
+   },
+   {
+    "f0": 120,
+    "f1": 128,
+    "t0": 5.0,
+    "t1": 5.375,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "parts": [
+     [
+      "BE",
+      "white"
+     ],
+     [
+      "CAUSE",
+      "red"
+     ]
+    ]
+   },
+   {
+    "f0": 129,
+    "f1": 134,
+    "t0": 5.375,
+    "t1": 5.625,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "OF",
+    "color": "white"
+   },
+   {
+    "f0": 135,
+    "f1": 167,
+    "t0": 5.625,
+    "t1": 7.0,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "YOU",
+    "color": "red"
+   },
+   {
+    "f0": 168,
+    "f1": 173,
+    "t0": 7.0,
+    "t1": 7.25,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "OF",
+    "color": "white"
+   },
+   {
+    "f0": 174,
+    "f1": 178,
+    "t0": 7.25,
+    "t1": 7.458,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "COURSE",
+    "color": "red"
+   },
+   {
+    "f0": 179,
+    "f1": 183,
+    "t0": 7.458,
+    "t1": 7.667,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "I'M",
+    "color": "white"
+   },
+   {
+    "f0": 184,
+    "f1": 213,
+    "t0": 7.667,
+    "t1": 8.917,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "ANGRY",
+    "color": "red"
+   },
+   {
+    "f0": 214,
+    "f1": 216,
+    "t0": 8.917,
+    "t1": 9.042,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "YOU",
+    "color": "white"
+   },
+   {
+    "f0": 217,
+    "f1": 219,
+    "t0": 9.042,
+    "t1": 9.167,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "DIDN'T",
+    "color": "red"
+   },
+   {
+    "f0": 220,
+    "f1": 223,
+    "t0": 9.167,
+    "t1": 9.333,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "JUST",
+    "color": "white"
+   },
+   {
+    "f0": 224,
+    "f1": 228,
+    "t0": 9.333,
+    "t1": 9.542,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "MAKE",
+    "color": "white"
+   },
+   {
+    "f0": 229,
+    "f1": 231,
+    "t0": 9.542,
+    "t1": 9.667,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "THE",
+    "color": "white"
+   },
+   {
+    "f0": 232,
+    "f1": 248,
+    "t0": 9.667,
+    "t1": 10.375,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "DECISION",
+    "color": "red"
+   },
+   {
+    "f0": 249,
+    "f1": 252,
+    "t0": 10.375,
+    "t1": 10.542,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "TO",
+    "color": "white"
+   },
+   {
+    "f0": 253,
+    "f1": 257,
+    "t0": 10.542,
+    "t1": 10.75,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "ABANDON",
+    "color": "red"
+   },
+   {
+    "f0": 258,
+    "f1": 260,
+    "t0": 10.75,
+    "t1": 10.875,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "ME",
+    "color": "white"
+   },
+   {
+    "f0": 261,
+    "f1": 286,
+    "t0": 10.875,
+    "t1": 11.958,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "ONCE",
+    "color": "red"
+   },
+   {
+    "f0": 287,
+    "f1": 291,
+    "t0": 11.958,
+    "t1": 12.167,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "YOU",
+    "color": "white"
+   },
+   {
+    "f0": 292,
+    "f1": 297,
+    "t0": 12.167,
+    "t1": 12.417,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "MADE",
+    "color": "red"
+   },
+   {
+    "f0": 298,
+    "f1": 300,
+    "t0": 12.417,
+    "t1": 12.542,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "THAT",
+    "color": "white"
+   },
+   {
+    "f0": 301,
+    "f1": 310,
+    "t0": 12.542,
+    "t1": 12.958,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "DECISION",
+    "color": "red"
+   },
+   {
+    "f0": 311,
+    "f1": 321,
+    "t0": 12.958,
+    "t1": 13.417,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "EVERY",
+    "color": "white"
+   },
+   {
+    "f0": 322,
+    "f1": 338,
+    "t0": 13.417,
+    "t1": 14.125,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "SINGLE",
+    "color": "red"
+   },
+   {
+    "f0": 339,
+    "f1": 341,
+    "t0": 14.125,
+    "t1": 14.25,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "YOU",
+    "color": "red"
+   },
+   {
+    "f0": 342,
+    "f1": 345,
+    "t0": 14.25,
+    "t1": 14.417,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "STAYED",
+    "color": "white"
+   },
+   {
+    "f0": 346,
+    "f1": 355,
+    "t0": 14.417,
+    "t1": 14.833,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "AWAY",
+    "color": "red"
+   },
+   {
+    "f0": 356,
+    "f1": 363,
+    "t0": 14.833,
+    "t1": 15.167,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "FOR",
+    "color": "white"
+   },
+   {
+    "f0": 364,
+    "f1": 376,
+    "t0": 15.167,
+    "t1": 15.708,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "10",
+    "color": "white"
+   },
+   {
+    "f0": 377,
+    "f1": 391,
+    "t0": 15.708,
+    "t1": 16.333,
+    "style": "serif",
+    "x": 0.5,
+    "y": 0.49,
+    "text": "YEARS",
+    "color": "red"
+   },
+   {
+    "f0": 330,
+    "f1": 338,
+    "t0": 13.75,
+    "t1": 14.125,
+    "text": "DAY",
+    "style": "serif",
+    "color": "white",
+    "x": 0.576,
+    "y": 0.56
+   }
+  ]
+ },
+ "audio": {
+  "source": "ref",
+  "offset": 0.0,
+  "sfx": [],
+  "loudness": -14,
+  "true_peak": -1.0
+ }
+}
